@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 
+import mongoengine
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -81,6 +83,13 @@ DATABASES = {
     }
 }
 
+# MONGODB
+
+_MONGODB_HOST = 'localhost:27017'
+_MONGODB_NAME = 'patent'
+_MONGODB_DATABASE_HOST = 'mongodb://{host}/{name}'.format(host=_MONGODB_HOST, name=_MONGODB_NAME)
+
+mongoengine.connect(_MONGODB_NAME, host=_MONGODB_DATABASE_HOST)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators

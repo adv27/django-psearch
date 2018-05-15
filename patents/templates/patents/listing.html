@@ -1,0 +1,16 @@
+{% extends 'patents/base.html' %}
+{% block body %}
+    <h1>List pattents</h1>
+    <form action="{% url 'patents:search' %}" method="get">
+
+    </form>
+    {% for patten in pattens %}
+        <div class="pattens-item">
+            <h2>{{ patten.title }}</h2>
+            <p>{{ patten.abstract }}</p>
+            <a href="{% url 'patents:show' patten.id %}">View detail</a>
+            <br>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}

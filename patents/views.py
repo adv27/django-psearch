@@ -5,8 +5,8 @@ from django.shortcuts import render
 from django.views.generic.edit import FormView
 
 from .forms import FileFieldForm
-from .models import *
 from .utils import *
+
 
 # Create your views here.
 
@@ -30,7 +30,7 @@ def search(request):
         'time': time.time() - t0,
     }
 
-    render(request, template_name='search.html', context=context)
+    return render(request, template_name='patents/listing.html', context=context)
 
 
 def show(request, pat_id):
@@ -40,7 +40,7 @@ def show(request, pat_id):
         'time': time.time() - t0,
     }
 
-    render(request, template_name='show.html', context=context)
+    return render(request, template_name='show.html', context=context)
 
 
 class FileFieldView(FormView):
@@ -50,6 +50,7 @@ class FileFieldView(FormView):
     success_url = '../upload'
 
     def post(self, request, *args, **kwargs):
+        from multiprocessing import Pool
 
         form_class = self.get_form_class()
         form = self.get_form(form_class)
@@ -58,35 +59,20 @@ class FileFieldView(FormView):
             t0 = time.time()
             print('len(files): {}, type: {}'.format(len(files), type(files)))
             # for f in files:
-            #     filename = basename(f.name)
-            #     print(filename)
+            #     print(f.name)
             #     _dict = xmltodict.parse(f)
             #     _json = json.dumps(_dict)
             #     doc = json.loads(_json)
-            #     save_mongo(filename=filename, doc=doc)
+            #     save_mongo(filename=f.name, doc=doc)
 
-            # with Pool(processes=5) as pool:
-            #     file_list = ((f.name,f.read()) for f in files)
-            #     pool.map(self.handle_uploaded_file, file_list)
-            #     # pool.map(self.handle_uploaded_file, files)
-            #     pool.close()
-            #     pool.join()
-            #     # if Patent.objects.filter(filename=filename).first():
-
-            for i in ((f.name, f.read()) for f in files):
-                print('{name} - {sample_data}'.format(name=i[0], sample_data=i[1][:20]))
-                save_mongo(*i)
+            'filter the files list'
+            files = (f for f in files if Patent.objects.filter(filename=f.name).first() is None)
+            with Pool(processes=15) as pool:  # using 5 processes to handle uploaded files
+                file_list = ((f.name, f.read()) for f in files)
+                pool.map(handle_uploaded_file_unpack, file_list)
+                pool.close()
+                pool.join()
             print('{}'.format(time.time() - t0))
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
-
-    @staticmethod
-    def handle_uploaded_file(filestream, filename):
-        import xmltodict
-        import json
-
-        _dict = xmltodict.parse(filestream)
-        _json = json.dumps(_dict)
-        doc = json.loads(_json)
-        save_mongo(filename=filename, doc=doc)
