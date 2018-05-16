@@ -1,10 +1,18 @@
 {% extends 'patents/base.html' %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="https://netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css">
+    {% load static from staticfiles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/search.css' %}">
+    <script type="text/javascript" src="{% static 'patents/scripts/search.js' %}" async></script>
+{% endblock %}
 {% block body %}
-    <h1>List patents</h1>
-    <form action="{% url 'patents:search' %}" method="get">
-        <input type="text" name="q" id="q">
-        <input type="submit" value="Search">
-    </form>
+    <h1 class="logo">Patent</h1>
+    <div class="search">
+        <form action="{% url 'patents:search' %}" method="get">
+            <input type="text" name="q" id="q">
+            <button type="submit"><i class='icon-search'></i></button>
+        </form>
+    </div>
     <br>
     <div>
         <form action="{% url 'patents:account_create' %}" method="post">
@@ -43,5 +51,24 @@
             </div>
             <hr>
         {% endfor %}
+        {% if patents.has_other_pages %}
+            {% if patents.has_previous %}
+                <li><a href="?page={{ patents.previous_page_number }}">&laquo;</a></li>
+            {% else %}
+                <li class="disabled"><span>&laquo;</span></li>
+            {% endif %}
+            {% for i in patents.paginator.page_range %}
+                {% if patents.number == i %}
+                    <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                {% else %}
+                    <li><a href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if patents.has_next %}
+                <li><a href="?page={{ patents.next_page_number }}">&raquo;</a></li>
+            {% else %}
+                <li class="disabled"><span>&raquo;</span></li>
+            {% endif %}
+        {% endif %}
     {% endif %}
 {% endblock %}

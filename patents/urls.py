@@ -21,5 +21,5 @@ urlpatterns += [
 
 # rate function
 urlpatterns += [
-    path('rate/', views.rate, name='rate'),
+    path('rate', views.rate, name='rate'),
 ]
