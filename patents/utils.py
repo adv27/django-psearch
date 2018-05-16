@@ -28,6 +28,8 @@ def handle_uploaded_file_unpack(args):
 
 
 def save_mongo(filename, doc):
+    import pymongo
+    from bson.json_util import loads
     try:
         # print(doc)
 
@@ -49,7 +51,15 @@ def save_mongo(filename, doc):
             abstract=abstract,
             content=detail,
         )
-        patent.save()
+        patent = loads(patent.to_json())  # Document to JSON then to BSON
+        '''
+        Using pymongo client for multi processes purpose
+        '''
+        client = pymongo.MongoClient('localhost', 27017).patent
+        db = client.patent
+        result = db.insert_one(patent)
+        print(result.inserted_id)
+
     except Exception as e:
         print('{} - {}'.format(filename, e))
         return
