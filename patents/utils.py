@@ -1,6 +1,18 @@
 from .models import *
 
 
+def create_user_validation(username, password):
+    return True
+
+
+def create_user(username, password):
+    user = User(
+        user_name=username,
+        password=password,
+    )
+    user.save()
+
+
 def handle_uploaded_file(filename, filestream):
     import xmltodict
     import json

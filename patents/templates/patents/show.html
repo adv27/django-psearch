@@ -1,0 +1,44 @@
+{% extends 'patents/base.html' %}
+{% block head %}
+    {% load static from staticfiles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/rating.css' %}">
+{% endblock %}
+{% block body %}
+    {% if patent %}
+        <h1>Search time {{ time }}</h1>
+        <div class="pattens-item">
+            <h1>{{ patent.title }}</h1>
+            <hr>
+            <h3>#-Abstract</h3>
+            <p style="white-space: pre-line">{{ patent.abstract }}</p>
+            <h3>#-Content</h3>
+            <p style="white-space: pre-line">{{ patent.content }}</p>
+            <br>
+        </div>
+        {% if request.session.user_id %}
+            <div id="reviewStars-input">
+                {% for title in rate_titles reversed %}
+                    <input id="star-{{ forloop.revcounter0 }}"
+                           type="radio"
+                           name="reviewStars"
+                           value="{{ forloop.revcounter }}"
+                            {% if rating == forloop.revcounter %} checked="checked" {% endif %}/>
+                    <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>
+                {% endfor %}
+
+                <input type="hidden" name="pid" value="{{ patent.id }}">
+            </div>
+        {% endif %}
+    {% endif %}
+    <hr>
+    {% if rating %}
+        <div>
+            <h1>Rating: {{ rating }}</h1>
+        </div>
+    {% else %}
+        <div>
+            <h1>No rating yet</h1>
+        </div>
+    {% endif %}
+    <script type="text/javascript" src="{% static 'patents/scripts/rating.js' %}" async></script>
+{% endblock %}

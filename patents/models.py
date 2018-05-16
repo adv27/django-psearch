@@ -7,7 +7,7 @@ from mongoengine import *
 
 class Patent(Document):
     filename = StringField(help_text='Name of XML file')
-    created_at = DateTimeField(default=datetime.utcnow)
+    created_at = DateTimeField(default=datetime.now())
 
     title = StringField(help_text='Title of Patent')
     abstract = StringField(help_text='Short description of Patent')
@@ -25,18 +25,19 @@ class Patent(Document):
         ]
     }
 
+
 class User(Document):
     user_name = StringField(help_text='Login name', required=True)
     password = StringField(help_text='password for login', required=True)
     query_first = DateTimeField(help_text='Date/time of first query')
     query_last = DateTimeField(help_text='Date/time of latest query')
-    query_count = IntField(help_text='Query times')
+    query_count = IntField(help_text='Query times', default=0)
 
 
 class Rate(Document):
     user_id = ReferenceField(User)
     patent_id = ReferenceField(Patent)
-    rate = IntField(help_text="User's rate", min_value=1, max_value=5)
+    rating = IntField(help_text="User's rate", min_value=1, max_value=5)
     date = DateTimeField(help_text='Date/time user make this rate')
 
 
