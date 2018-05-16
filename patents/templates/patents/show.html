@@ -1,4 +1,5 @@
 {% extends 'patents/base.html' %}
+{% load app_filters %}
 {% block head %}
     {% load static from staticfiles %}
     <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/rating.css' %}">
@@ -22,13 +23,31 @@
                            type="radio"
                            name="reviewStars"
                            value="{{ forloop.revcounter }}"
-                            {% if rating == forloop.revcounter %} checked="checked" {% endif %}/>
+                            {% if rating == forloop.revcounter %} checked="checked"{% endif %}/>
                     <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>
                 {% endfor %}
 
                 <input type="hidden" name="pid" value="{{ patent.id }}">
             </div>
         {% endif %}
+        {% for title in rate_titles reversed %}
+            <div id="reviewStars-input" style="width: 100%">
+                {% for title in rate_titles reversed %}
+                    <input id="star-{{ forloop.revcounter0 }}"
+                           type="radio"
+                           value="{{ forloop.revcounter }}"
+                            {% if forloop.parentloop.revcounter == forloop.revcounter %} checked="checked"{% endif %}/>
+                    <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>
+                {% endfor %}
+                <h1>
+                    {% if rate_count|get_item:forloop.revcounter %}
+                        {{ rate_count|get_item:forloop.revcounter }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </h1>
+            </div>
+        {% endfor %}
     {% endif %}
     <hr>
     {% if rating %}
