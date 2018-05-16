@@ -55,16 +55,28 @@ def search(request):
 def detail(request, pat_id):
     t0 = time.time()
 
+    p = Patent.objects.get(id=pat_id)
+
     r = None
     try:
         uid = request.session.get('user_id', False)
         if uid:
+            u = User.objects.get(id=uid)
             r = Rate.objects.get(
-                user_id=User.objects.get(id=uid),
-                patent_id=Patent.objects.get(id=pat_id),
+                user_id=u,
+                patent_id=p,
             )
     except DoesNotExist:
         pass
+
+    rates = Rate.objects.filter(patent_id=p)
+    rate_count = dict()
+    for _r in rates:
+        _rating = _r.rating
+        if _rating in rate_count:
+            rate_count[_rating] += 1
+        else:
+            rate_count[_rating] = 1
 
     rate_titles = ['bad', 'poor', 'regular', 'good', 'gorgeous']
 
@@ -73,6 +85,7 @@ def detail(request, pat_id):
         'time': time.time() - t0,
         'rating': r.rating if r is not None else None,
         'rate_titles': rate_titles,
+        'rate_count': rate_count,
     }
 
     return render(request, template_name='patents/show.html', context=context)
