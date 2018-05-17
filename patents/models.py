@@ -12,6 +12,8 @@ class Patent(Document):
     title = StringField(help_text='Title of Patent')
     abstract = StringField(help_text='Short description of Patent')
     content = StringField(help_text="Patent's content")
+    rate = FloatField(help_text='Average rating', default=0)
+    view = IntField(help_text='View times', default=0)
 
     meta = {
         'indexes': [
@@ -43,8 +45,8 @@ class Rate(Document):
 
 class Search(Document):
     user_id = ReferenceField(User)
-    keyword = LineStringField(help_text='Search keyword that user entered')
-    data = DateTimeField(help_text='Date/time user make this search query')
+    keyword = StringField(help_text='Search keyword that user entered', null=True)
+    date = DateTimeField(help_text='Date/time user make this search query')
 
 
 class View(Document):

@@ -1,16 +1,8 @@
 import time
 
 from django.core.paginator import Paginator
-from django.http import (
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseRedirect,
-    JsonResponse,
-)
-from django.shortcuts import (
-    render,
-    reverse,
-)
+from django.http import (Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse)
+from django.shortcuts import (redirect, render, reverse)
 from django.views.generic.edit import FormView
 
 from .forms import FileFieldForm
@@ -20,16 +12,24 @@ from .utils import *
 # Create your views here.
 
 def index(request):
-    pass
+    context = {
+
+    }
+    return render(request, template_name='patents/index.html', context=context)
 
 
 def search(request):
     t0 = time.time()
     query = request.GET.get('q')
-    if query:
-        patent_list = Patent.objects.search_text(query).order_by('$text_score')
+    if query is not None:
+        if query is not '':
+            patent_list = Patent.objects.search_text(query).order_by('$text_score')
+        else:
+            patent_list = Patent.objects.all()
+
         if request.session.get('user_id', False):
             uid = request.session.get('user_id')
+            'modify user document'
             u = User.objects.get(id=uid)
             # increase query_count
             u.query_count += 1
@@ -38,8 +38,24 @@ def search(request):
             if u.query_first is None:
                 u.query_first = datetime.now()
             u.save()  # save the change
+
+            'modify search document'
+            try:
+                s = Search.objects.get(
+                    user_id=u,
+                    keyword=query,
+                )
+                s.date = datetime.now()
+            except DoesNotExist:
+                s = Search(
+                    user_id=u,
+                    keyword=query,
+                    date=datetime.now(),
+                )
+            s.save()
     else:
-        patent_list = Patent.objects.all()
+        return redirect('/search?q={query}'.format(query=''))
+
     page = request.GET.get('page', 1)
     paginator = Paginator(patent_list, 10)  # Show 10 patents per page
     patents = paginator.get_page(page)
@@ -47,6 +63,7 @@ def search(request):
     context = {
         'patents': patents,
         'time': time.time() - t0,
+        'query': query,
     }
 
     return render(request, template_name='patents/listing.html', context=context)
@@ -54,38 +71,79 @@ def search(request):
 
 def detail(request, pat_id):
     t0 = time.time()
+    try:
+        p = Patent.objects.get(id=pat_id)
+    except (DoesNotExist, ValidationError) as e:
+        print(e)
+        raise Http404
+    time_query = time.time() - t0
+    # Increase view times
+    p.view += 1
+    p.save()
 
-    p = Patent.objects.get(id=pat_id)
-
+    # Checking if user is logged in
+    # If user is logged in => get user's rate for this patent
     r = None
     try:
         uid = request.session.get('user_id', False)
         if uid:
             u = User.objects.get(id=uid)
-            r = Rate.objects.get(
-                user_id=u,
-                patent_id=p,
-            )
+            try:
+                r = Rate.objects.get(
+                    user_id=u,
+                    patent_id=p,
+                )
+            except DoesNotExist:
+                r = None
+
+            'modify View Document'
+            # if request has 'ref' param => the request come from search page
+            # 'ref' param = search keyword
+            ref = request.GET.get('ref')
+            if ref is not None:
+                try:
+                    s = Search.objects.get(
+                        user_id=u,
+                        keyword=ref,
+                    )
+                    try:
+                        v = View.objects.get(
+                            search_id=s,
+                            patent_id=p,
+                        )
+                        v.date = datetime.now()
+                    except DoesNotExist:
+                        v = View(
+                            search_id=s,
+                            patent_id=p,
+                            date=datetime.now(),
+                        )
+                    v.save()
+                except DoesNotExist:
+                    print('Detail function: Wrong ref: {ref}, user: {user} don\'t make this search'.format(ref=ref,
+                                                                                                           user=u.user_name))
+
     except DoesNotExist:
         pass
 
+    # Get rates related to this patent
+    from collections import Counter
     rates = Rate.objects.filter(patent_id=p)
-    rate_count = dict()
-    for _r in rates:
-        _rating = _r.rating
-        if _rating in rate_count:
-            rate_count[_rating] += 1
-        else:
-            rate_count[_rating] = 1
+    c = Counter(list(map(lambda _r: _r.rating, rates)))
+    rate_count = dict(c)
+
+    # Get average rate of this patent
+    rate_avg = p.rate
 
     rate_titles = ['bad', 'poor', 'regular', 'good', 'gorgeous']
 
     context = {
-        'patent': Patent.objects.get(id=pat_id),
-        'time': time.time() - t0,
-        'rating': r.rating if r is not None else None,
+        'patent': p,
+        'time': time_query,
+        'user_rating': r.rating if r is not None else None,
         'rate_titles': rate_titles,
         'rate_count': rate_count,
+        'rate_avg': rate_avg,
     }
 
     return render(request, template_name='patents/show.html', context=context)
@@ -129,6 +187,12 @@ def create_account(request):
     return HttpResponseBadRequest()
 
 
+def change_password_account(request):
+    if request.method == 'POST':
+        pass
+    return HttpResponseBadRequest()
+
+
 def rate(request):
     patent_id = None
     rating = int()
@@ -142,22 +206,33 @@ def rate(request):
         # checking user session
         uid = request.session.get('user_id', False)
         if uid:
+            u = User.objects.get(id=uid)
+            p = Patent.objects.get(id=patent_id)
             try:
                 r = Rate.objects.get(
-                    user_id=User.objects.get(id=uid),
-                    patent_id=Patent.objects.get(id=patent_id),
+                    user_id=u,
+                    patent_id=p,
                 )
+                # if rate is matching in the db, update it's rating and date
                 r.rating = rating
-                r.save()
+                r.date = datetime.now()
             except DoesNotExist:
+                # create new rate document
                 r = Rate(
-                    user_id=User.objects.get(id=uid),
-                    patent_id=Patent.objects.get(id=patent_id),
+                    user_id=u,
+                    patent_id=p,
                     rating=rating,
                     date=datetime.now()
                 )
-                r.save()
             if r is not None:
+                # save it
+                r.save()
+                # re-calculate average rate from Patent Document then save it
+                rates = Rate.objects.filter(patent_id=p)
+                from statistics import mean
+                p.rate = mean(list(map(lambda _r: _r.rating, rates)))
+                p.save()
+
                 jsonRes = JsonResponse({
                     'uid': str(r.user_id.id),
                     'pid': str(r.patent_id.id),
@@ -190,14 +265,8 @@ class FileFieldView(FormView):
         if form.is_valid():
             t0 = time.time()
             print('len(files): {}, type: {}'.format(len(files), type(files)))
-            # for f in files:
-            #     print(f.name)
-            #     _dict = xmltodict.parse(f)
-            #     _json = json.dumps(_dict)
-            #     doc = json.loads(_json)
-            #     save_mongo(filename=f.name, doc=doc)
 
-            'filter the files list'
+            'filter the files list, if the file name already in the db, then skip it'
             files = (f for f in files if Patent.objects.filter(filename=f.name).first() is None)
             with Pool(processes=15) as pool:  # using 5 processes to handle uploaded files
                 file_list = ((f.name, f.read()) for f in files)

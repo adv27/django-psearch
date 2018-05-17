@@ -7,6 +7,7 @@
 {% block body %}
     {% if patent %}
         <h1>Search time {{ time }}</h1>
+        <h1>View times {{ patent.view }}</h1>
         <div class="pattens-item">
             <h1>{{ patent.title }}</h1>
             <hr>
@@ -16,6 +17,7 @@
             <p style="white-space: pre-line">{{ patent.content }}</p>
             <br>
         </div>
+        <h1>Average Rate: {{ rate_avg }}</h1>
         {% if request.session.user_id %}
             <div id="reviewStars-input">
                 {% for title in rate_titles reversed %}
@@ -23,7 +25,7 @@
                            type="radio"
                            name="reviewStars"
                            value="{{ forloop.revcounter }}"
-                            {% if rating == forloop.revcounter %} checked="checked"{% endif %}/>
+                            {% if user_rating == forloop.revcounter %} checked="checked"{% endif %}/>
                     <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>
                 {% endfor %}
 
@@ -50,9 +52,9 @@
         {% endfor %}
     {% endif %}
     <hr>
-    {% if rating %}
+    {% if user_rating %}
         <div>
-            <h1>Rating: {{ rating }}</h1>
+            <h1>Your rating: {{ user_rating }}</h1>
         </div>
     {% else %}
         <div>
