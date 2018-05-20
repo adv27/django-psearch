@@ -1,0 +1,56 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,600,700);
+
+.star-ratings-sprite {
+    background: url("../images/star-rating-sprite.png") repeat-x;
+    font-size: 0;
+    height: 21px;
+    line-height: 0;
+    overflow: hidden;
+    text-indent: -999em;
+    width: 110px;
+    margin: 0 auto;
+}
+
+.star-ratings-sprite-rating {
+    background: url("../images/star-rating-sprite.png") repeat-x 0 100%;
+    float: left;
+    height: 21px;
+    display: block;
+}
+
+.fa {
+    margin-right: 5px;
+}
+
+.rating .fa {
+    font-size: 22px;
+}
+
+.rating-num {
+    margin-top: 0px;
+    font-size: 54px;
+}
+
+.progress {
+    margin-bottom: 5px;
+    height: 20px;
+}
+
+.progress .progress-bar{
+    height: 20px;
+    text-align: left;
+}
+
+.rating-desc .col-md-3 {
+    padding-right: 0px;
+}
+
+.sr-only {
+    margin-left: 5px;
+    overflow: visible;
+    clip: auto;
+}
+
+
+
+

@@ -1,74 +1,135 @@
 {% extends 'patents/base.html' %}
+{% load app_filters %}
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="https://netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css">
+    {#    <link rel="stylesheet" type="text/css" href="https://netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css">#}
     {% load static from staticfiles %}
-    <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/search.css' %}">
-    <script type="text/javascript" src="{% static 'patents/scripts/search.js' %}" async></script>
-{% endblock %}
-{% block body %}
-    <h1 class="logo">Patent</h1>
-    <div class="search">
-        <form action="{% url 'patents:search' %}" method="get">
-            <input type="text" name="q" id="q">
-            <button type="submit"><i class='icon-search'></i></button>
-        </form>
-    </div>
-    <br>
-    <div>
-        <form action="{% url 'patents:account_create' %}" method="post">
-            {% csrf_token %}
-            <input type="text" name="username" id="username">
-            <input type="password" name="password" id="password">
-            <input type="submit" value="Create">
-        </form>
-    </div>
-    <br>
-    <div>
-        {% if request.session.user_id %}
-            <form action="{% url 'patents:account_logout' %}" method="post">
-                {% csrf_token %}
-                <input type="submit" value="Logout">
-            </form>
-        {% else %}
-            <form action="{% url 'patents:account_login' %}" method="post">
-                {% csrf_token %}
-                <input type="text" name="username" id="username">
-                <input type="password" name="password" id="password">
-                <input type="submit" value="Login">
-            </form>
-        {% endif %}
-    </div>
-    <br>
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'bower_components/components-font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'bower_components/bootstrap/dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.4.3/css/mdb.min.css">
 
-    {% if patents %}
+    <script type="text/javascript" src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bower_components/tether/dist/js/tether.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    {#    <script type="text/javascript" src="{% static 'patents/scripts/bootstrap-multiselect.js' %}"></script>#}
+    {#        <link rel="stylesheet" href="{% static 'patents/fonts/font-awesome/css/font-awesome.min.css' %}">#}
+    {#    <link rel="stylesheet" href="{% static 'patents/styles/jquery.auto-complete.css' %}">#}
+    {#    <link rel="stylesheet" href="{% static 'patents/styles/bootstrap-multiselect.css' %}">#}
+    <link rel="stylesheet" href="{% static 'patents/styles/base.css' %}">
+    <link rel="stylesheet" href="{% static 'patents/styles/sharecode.css' %}">
+    {#        <link rel="stylesheet" href="{% static 'patents/styles/sharecode/account/account.css' %}">#}
+
+    {#    <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/logo.css' %}">#}
+    <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/style.css' %}">
+    {#    <script type="text/javascript" src="{% static 'patents/scripts/search.js' %}" async></script>#}
+    {#    <script type="text/javascript" src="{% static 'patents/scripts/underscore-min.js' %}"></script>#}
+{% endblock %}
+
+{% block nav %}
+    {% include 'patents/includes/navbar_search.html' %}
+{% endblock %}
+
+{% block body %}
+    <div class="container cs-wapper">
         <h1>Search time {{ time }}</h1>
-        {% for patent in patents %}
-            <div class="patent-item">
-                <h2>{{ patent.title }}</h2>
-                <p>{{ patent.abstract }}</p>
-                <a href="{% url 'patents:show' patent.id %}?ref={{ query }}">View detail</a>
-                <br>
-            </div>
-            <hr>
-        {% endfor %}
-        {% if patents.has_other_pages %}
-            {% if patents.has_previous %}
-                <li><a href="?page={{ patents.previous_page_number }}">&laquo;</a></li>
-            {% else %}
-                <li class="disabled"><span>&laquo;</span></li>
-            {% endif %}
-            {% for i in patents.paginator.page_range %}
-                {% if patents.number == i %}
-                    <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
-                {% else %}
-                    <li><a href="?page={{ i }}">{{ i }}</a></li>
+        {% comment %}
+            Display list patents
+        {% endcomment %}
+        <div class="col-md-12" style="padding:10px 0 0 0;">
+            <div class="col-ele" style="min-height:calc(100vh - 210px);">
+                {% if patents %}
+                    {% for patent in patents %}
+                        <div class="jumbotron">
+                            <div class="table table-filter">
+                                <div class="media">
+                                    <div class="media-body">
+                                        <a href="{% url 'patents:show' patent.id %}?ref={{ query }}">
+                                            <h4 class="title">
+                                                {{ patent.title }}
+                                            </h4>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <h6 class="tt-tags">
+                                <div class="float-left">
+                                    <span title="{{ patent.rate }}">
+                                        <div class="star-ratings-sprite">
+                                            <span style="width:{{ patent.rate | x20 }}%"
+                                                  class="star-ratings-sprite-rating">
+                                            </span>
+                                        </div>
+                                    </span>
+                                </div>
+                                <div class="float-right">
+                                    <!-- if user not login, when lick to btn download to open modal login. In else case, open modal download -->
+                                    <span class="media-download" data-toggle="modal" data-target="#login-form"
+                                          data-placement="top">
+                                        <i class="fa fa-download" aria-hidden="true"
+                                           style="margin-right:5px;"></i>Tải về
+                                    </span>
+                                </div>
+                            </h6>
+                            <p class="media-content">
+                                {{ patent.abstract }}
+                            </p>
+                        </div>
+                    {% endfor %}
                 {% endif %}
-            {% endfor %}
-            {% if patents.has_next %}
-                <li><a href="?page={{ patents.next_page_number }}">&raquo;</a></li>
-            {% else %}
-                <li class="disabled"><span>&raquo;</span></li>
-            {% endif %}
-        {% endif %}
-    {% endif %}
+            </div>
+        </div>
+        {% comment %}
+            Pagination section
+        {% endcomment %}
+        <div class="col-ele">
+            <div class="cs-pagination">
+                <ul class="pagination pagination-circle pg-blue mb-0">
+                    {% if patents.has_other_pages %}
+                        {% if patents.number !=  1 %}
+                            <li class="page-item">
+                                <a href="?q={{ query }}" class="page-link waves-effect waves-effect">
+                                    First
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if patents.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link waves-effect waves-effect"
+                                   href="?page={{ patents.previous_page_number }}&q={{ query }}">
+                                    &laquo;
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for i in pages %}
+                            {% if patents.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link waves-effect waves-effect">{{ i }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a href="?page={{ i }}&q={{ query }}"
+                                       class="page-link waves-effect waves-effect">{{ i }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if patents.has_next %}
+                            <li class="page-item"><a href="?page={{ patents.next_page_number }}&q={{ query }}"
+                                                     class="page-link waves-effect waves-effect">&raquo;</a></li>
+                        {% endif %}
+                        {% if patents.number !=  patents.paginator.num_pages %}
+                            <li class="page-item">
+                                <a href="?page={{ patents.paginator.num_pages }}&q={{ query }}"
+                                   class="page-link waves-effect waves-effect">
+                                    Last
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
 {% endblock %}

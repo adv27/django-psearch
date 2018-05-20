@@ -23,7 +23,9 @@ def search(request):
     query = request.GET.get('q')
     if query is not None:
         if query is not '':
-            patent_list = Patent.objects.search_text(query).order_by('$text_score')
+            # patent_list = Patent.objects.search_text(query).order_by('$text_score')
+            patent_list = Patent.objects.search_text(query).order_by('-rate')
+            # patent_list = Patent.objects.search_text(query).order_by('-view')
         else:
             patent_list = Patent.objects.all()
 
@@ -56,12 +58,31 @@ def search(request):
     else:
         return redirect('/search?q={query}'.format(query=''))
 
-    page = request.GET.get('page', 1)
+    page_no = int(request.GET.get('page', 1))
     paginator = Paginator(patent_list, 10)  # Show 10 patents per page
-    patents = paginator.get_page(page)
+    patents = paginator.get_page(page_no)
+
+    '''
+    we assume that if there are more than 11 pages 
+    (current, 5 before, 5 after) we are always going to show 11 links. 
+    Now we have 4 cases:
+        Number of pages < 11: show all pages;
+        Current page <= 6: show first 11 pages;
+        Current page > 6 and < (number of pages - 6): show current page, 5 before and 5 after;
+        Current page >= (number of pages -6): show the last 11 pages.
+    '''
+    num_pages = paginator.num_pages
+
+    if num_pages <= 11 or page_no <= 6:  # case 1 and 2
+        pages = [x for x in range(1, min(num_pages + 1, 12))]
+    elif page_no > num_pages - 6:  # case 4
+        pages = [x for x in range(num_pages - 10, num_pages + 1)]
+    else:  # case 3
+        pages = [x for x in range(page_no - 5, page_no + 6)]
 
     context = {
         'patents': patents,
+        'pages': pages,
         'time': time.time() - t0,
         'query': query,
     }
@@ -120,8 +141,10 @@ def detail(request, pat_id):
                         )
                     v.save()
                 except DoesNotExist:
-                    print('Detail function: Wrong ref: {ref}, user: {user} don\'t make this search'.format(ref=ref,
-                                                                                                           user=u.user_name))
+                    print('Detail function: Wrong ref: {ref}, user: {user} don\'t make this search'.format(
+                        ref=ref,
+                        user=u.user_name)
+                    )
 
     except DoesNotExist:
         pass
@@ -155,7 +178,7 @@ def login(request):
         print(u.password)
         if u.password == request.POST['password']:
             request.session['user_id'] = str(u.id)
-            return HttpResponseRedirect(reverse('patents:search'))
+            return HttpResponseRedirect(reverse('patents:index'))
     return HttpResponseBadRequest()
 
 
@@ -164,7 +187,7 @@ def logout(request):
         del request.session['user_id']
     except KeyError:
         pass
-    return HttpResponseRedirect(reverse('patents:search'))
+    return HttpResponseRedirect(reverse('patents:index'))
 
 
 def create_account(request):
@@ -188,8 +211,27 @@ def create_account(request):
 
 
 def change_password_account(request):
+    '''
+    - Checking session to make sure that user have been logged in
+    '''
     if request.method == 'POST':
-        pass
+        uid = request.session.get('user_id', False)
+        if uid:
+            u = User.objects.get(id=uid)
+            new_password = request.POST.get('new_password')
+            if new_password is None or new_password == '':
+                return JsonResponse({
+                    'error': True,
+                    'message': 'New Password is invalid',
+                })
+            u.password = new_password
+            u.save()
+            return redirect(reverse('patents:index'))
+        else:
+            return JsonResponse({
+                'error': True,
+                'message': 'Permission denied',
+            })
     return HttpResponseBadRequest()
 
 

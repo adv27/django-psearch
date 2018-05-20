@@ -20,7 +20,15 @@ def handle_uploaded_file(filename, filestream):
     _dict = xmltodict.parse(filestream)
     _json = json.dumps(_dict)
     doc = json.loads(_json)
-    save_mongo(filename=filename, doc=doc)
+    try:
+        save_mongo(filename=filename, doc=doc)
+    except Exception as e:
+        print('{} - {}'.format(filename, e))
+        return
+    # if save_mongo is success
+    with open(r'C:\Users\vdanh\Desktop\tmp\{}'.format(filename), 'wb') as f:
+        f.write(filestream)
+    print('Saved: {}'.format(filename))
 
 
 def handle_uploaded_file_unpack(args):
@@ -61,8 +69,7 @@ def save_mongo(filename, doc):
         print(result.inserted_id)
 
     except Exception as e:
-        print('{} - {}'.format(filename, e))
-        return
+        raise e
 
 
 def get_values_recursive(obj):

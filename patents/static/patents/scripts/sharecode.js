@@ -2,8 +2,8 @@ var suggestions = [];
 var xhr;
 
 function download(id) {
-    temp = $('#download-temp-' + id).attr('value');
-    uuid = $('#download-uuid-' + id).attr('value');
+    var temp = $('#download-temp-' + id).attr('value');
+    var uuid = $('#download-uuid-' + id).attr('value');
     var win = window.open('/download?uuid=' + uuid + '&temp=' + temp, '_blank');
 }
 
@@ -31,19 +31,18 @@ function highlight_search_complete(parent, search) {
 
     var n = [];
     var pos = parent_no_accent_vn.indexOf(search_no_accent_vn);
-    while(pos > -1) {
+    while (pos > -1) {
         n.push(pos);
-        pos = parent_no_accent_vn.indexOf(search_no_accent_vn, pos+1);
+        pos = parent_no_accent_vn.indexOf(search_no_accent_vn, pos + 1);
     }
 
-    if( n.length == 0)
+    if (n.length == 0)
         return parent;
     else {
         var result = "";
         var iFirst = 0;
-        for(i = 0; i < n.length; i++)
-        {
-            result += parent.slice(iFirst, n[i]) + "<b>" +  parent.slice(n[i], n[i] + search_no_accent_vn.length) + "</b>"
+        for (i = 0; i < n.length; i++) {
+            result += parent.slice(iFirst, n[i]) + "<b>" + parent.slice(n[i], n[i] + search_no_accent_vn.length) + "</b>"
             iFirst = n[i] + search_no_accent_vn.length;
         }
 
@@ -63,24 +62,27 @@ $('#search-term').autoComplete({
 
         search = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         var re = new RegExp("(" + search.split(' ').join('|') + ")", "gi");
-        return '<div class="autocomplete-suggestion" data-val="' + title + '">' +  "<span class='badge badge-primary'>" + language + "</span>"  + highlight_search_complete(title, search) + '</div>';
+        return '<div class="autocomplete-suggestion" data-val="' + title + '">' + "<span class='badge badge-primary'>" + language + "</span>" + highlight_search_complete(title, search) + '</div>';
     },
-    source: function(term, response){
-        try { xhr.abort(); } catch(e){}
+    source: function (term, response) {
+        try {
+            xhr.abort();
+        } catch (e) {
+        }
         xhr = $.getJSON(
             "/searchengine/get_suggestions", {
                 q: term
             },
-            function(data){
+            function (data) {
                 suggestions = data;
                 response(data);
             });
     },
-    onSelect: function(e, term, item){
-        var suggestion = _.find(suggestions, function(s){
-                if (s.title == term)
-                    return s.id
-            });
+    onSelect: function (e, term, item) {
+        var suggestion = _.find(suggestions, function (s) {
+            if (s.title == term)
+                return s.id
+        });
         window.location = "/project?id=" + suggestion.id;
     }
 });

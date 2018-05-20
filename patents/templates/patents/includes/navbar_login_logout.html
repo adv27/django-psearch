@@ -1,0 +1,55 @@
+{% load app_filters %}
+<div class="navbar-brand navbar-menu-right float-right">
+    <div class="tt-m float-right">
+        <div class="tt-ab float-left">
+            {% if request.session.user_id %}
+                <h1>You are {{ request.session.user_id|get_username }}</h1>
+                <form action="{% url 'patents:account_logout' %}" method="post" class="form-inline my-2 my-lg-0">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger my-2 my-sm-0" type="submit">Logout</button>
+                </form>
+            {% else %}
+                <button type="button" data-toggle="modal" data-target="#login-form"
+                        class="btn btn-sm btn-blue-grey cs-btn-singin waves-effect waves-light" style="margin-top:0px">
+                    <span class="btn-signin-text">Đăng Nhập</span>
+                    <i class="fa fa-sign-in mr-1 btn-signin-icon" style="font-size:25px;"></i>
+                </button>
+                <div class="modal fade cs-login-form" id="login-form" role="dialog" style="display: none;"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-header" style="background: #fff">
+                            <h5 class="modal-title" id="exampleModalLabel"></h5>
+                            <button type="button" class="close float-right" data-dismiss="modal">×</button>
+                        </div>
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div class="row">
+                                    <form class="contact_form col-sm-12 waves-effect waves-light"
+                                          action="{% url 'patents:account_login' %}" method="post"
+                                          name="contact_form">
+                                        {% csrf_token %}
+                                        <ul>
+                                            <li>
+                                                <input type="text" class="textbox1 form-control" name="username"
+                                                       required="" placeholder="Tài khoản">
+                                                <p class="icon"><i class="fa fa-user-o" aria-hidden="true"></i></p>
+                                            </li>
+                                            <li>
+                                                <input type="password" name="password" class="textbox2"
+                                                       placeholder="Mật khẩu">
+                                                <p class="icon"><i class="fa fa-lock" aria-hidden="true"></i></p>
+                                            </li>
+                                        </ul>
+                                        <input type="submit" name="Sign In" value="ĐĂNG NHẬP">
+                                        <div class="clear"></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

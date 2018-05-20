@@ -21,7 +21,7 @@ class Patent(Document):
                 'fields': [
                     '$title',
                     '$abstract',
-                    "$content"
+                    '$content',
                 ], 'default_language': 'english',
             }
         ]

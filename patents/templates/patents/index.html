@@ -1,92 +1,47 @@
-<html>
-<head lang="en">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coding.vn - Thư viện mã nguồn cho lập trình viên</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.4.3/css/mdb.min.css">
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+{% extends 'patents/base.html' %}
+
+{% block head %}
+    <title>Patent searching</title>
     {% load static from staticfiles %}
-    <link rel="stylesheet" href="{% static 'patents/fonts/font-awesome/css/font-awesome.min.css' %}">
-    <link rel="stylesheet" href="{% static 'patents/styles/bootstrap-multiselect.css' %}">
-    <script type="text/javascript" src="{% static 'patents/scripts/bootstrap-multiselect.js' %}"></script>
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'bower_components/components-font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'bower_components/bootstrap/dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.4.3/css/mdb.min.css">
+
+    <script type="text/javascript" src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bower_components/tether/dist/js/tether.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    {#    <script type="text/javascript" src="{% static 'patents/scripts/bootstrap-multiselect.js' %}"></script>#}
     <link rel="stylesheet" href="{% static 'patents/styles/base.css' %}">
-    <link href="{% static 'patents/styles/sharecode.css' %}" rel="stylesheet">
-    <link href="{% static 'patents/styles/sharecode/account/account.css' %}" rel="stylesheet">
-    <link href="{% static 'patents/styles/jquery.auto-complete.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'patents/styles/sharecode.css' %}">
+    {#    <link rel="stylesheet" href="{% static 'patents/styles/sharecode/account/account.css' %}">#}
 
-</head>
+    <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/logo.css' %}">
+    <script type="text/javascript" src="{% static 'patents/scripts/search.js' %}" async></script>
+{% endblock %}
 
-<body onload="OnLoading()" class="">
-<div id="loader" style="display: none;"></div>
-<div id="wrapper-body" style="display: block;">
-    <nav class="navbar justify-content-between" role="navigation">
-        <div class="navbar-brand navbar-menu-right float-right">
-            <div class="tt-m float-right">
-                <div class="tt-ab float-left">
-                    <!--sharecode/components/apps-box.html-->
-                </div>
-                <div class="tt-ab float-left">
-                    <button type="button" data-toggle="modal" data-target="#login-form"
-                            class="btn btn-blue-grey cs-btn-singin waves-effect waves-light" style="margin-top:0px">
-                        <span class="btn-signin-text">Đăng Nhập</span>
-                        <i class="fa fa-sign-in mr-1 btn-signin-icon" style="font-size:25px;"></i>
-                    </button>
-                    <div class="modal fade cs-login-form" id="login-form" role="dialog" style="display: none;"
-                         aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-header" style="background: #fff">
-                                <h5 class="modal-title" id="exampleModalLabel"></h5>
-                                <button type="button" class="close float-right" data-dismiss="modal">×</button>
-                            </div>
-                            <!-- Modal content-->
-                            <div class="modal-content">
-                                <div class="modal-body">
-                                    <div class="row">
-                                        <form class="contact_form col-sm-12 waves-effect waves-light"
-                                              action="/login" method="post" name="contact_form">
-                                            {% csrf_token %}
-                                            <ul>
-                                                <li>
-                                                    <input type="text" class="textbox1 form-control" name="id_username"
-                                                           required="" placeholder="Tài khoản">
-                                                    <p class="icon"><i class="fa fa-user-o" aria-hidden="true"></i></p>
-                                                </li>
-                                                <li>
-                                                    <input type="password" name="id_password" class="textbox2"
-                                                           placeholder="Mật khẩu">
-                                                    <p class="icon"><i class="fa fa-lock" aria-hidden="true"></i></p>
-                                                </li>
-                                            </ul>
-                                            <div class="forgot">
-                                            </div>
-                                            <input type="submit" name="Sign In" value="ĐĂNG NHẬP">
-                                            <div class="clear"></div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{% block nav %}
+    {% include 'patents/includes/navbar.html' %}
+{% endblock %}
 
-                </div>
-            </div>
-        </div>
-    </nav>
-    <div class="container" style="margin-top:50px;">
+{% block body %}
+    <div class="container">
         <div class="row">
             <div class="col-xs-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3" style="padding-top:120px">
                 <div class="cs-group text-center">
-                    <img src="{% static 'patents/images/codingvn.png' %}"
-                         alt="Coding.vn - Thư viện mã nguồn cho lập trình viên">
+                    <h1 class="logo">Patent</h1>
                 </div>
                 <div class="cs-group text-center">
-                    <form action="/search" method="get">
+                    <form action="{% url 'patents:search' %}" method="get">
                         <div class="form-group">
                             <div class="md-form">
-                                <input id="search-term" autofocus="" type="text" class="input-alternate ttuni-search"
-                                       name="q" autocomplete="off">
+                                <input id="search-term" autofocus="" type="text"
+                                       class="input-alternate ttuni-search"
+                                       name="q">
                             </div>
-                            <button type="submit" class="btn btn-blue-grey waves-effect waves-light">Tìm kiếm mã nguồn
+                            <button type="submit" class="btn btn-blue-grey waves-effect waves-light">Tìm kiếm mã
+                                nguồn
                             </button>
                         </div>
                     </form>
@@ -94,40 +49,5 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
-    <footer>
-
-
-        <script type="text/javascript"
-                src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.3/js/tether.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
-                integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
-                crossorigin="anonymous"></script>
-        <script type="text/javascript" src="{% static 'patents/scripts/underscore-min.js' %}"></script>
-        <script type="text/javascript"
-                src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
-        <script type="text/javascript"
-                src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.4.3/js/mdb.min.js"></script>
-
-        <script src="{% static  'patents/scripts/jquery.auto-complete.js' %}"></script>
-        <script src="{% static 'patents/scripts/sharecode.js' %}"></script>
-
-    </footer>
-</div>
-<div class="autocomplete-suggestions " style="top: 374.266px; left: 693.5px; width: 516px; display: none;">
-    <div class="autocomplete-suggestion" data-val=" hello world :: chương trình hello world"><span
-            class="badge badge-primary">c++</span> <b>hello</b> world :: chương trình <b>hello</b> world
-    </div>
-    <div class="autocomplete-suggestion" data-val=" hello world :: chương trình hello world"><span
-            class="badge badge-primary">c</span> <b>hello</b> world :: chương trình <b>hello</b> world
-    </div>
-</div>
-<script type="text/javascript">
-    function OnLoading() {
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("wrapper-body").style.display = "block";
-    }
-</script>
-<div class="hiddendiv common"></div>
-</body>
-</html>

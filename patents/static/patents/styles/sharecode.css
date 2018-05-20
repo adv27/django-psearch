@@ -1,7 +1,7 @@
 .cs-wapper {
-	width: 100%;
-	max-width: 100%;
-	padding: 0px;
+    width: 100%;
+    max-width: 100%;
+    padding: 0px;
 }
 
 /*    --------------------------------------------------
@@ -12,14 +12,17 @@ body {
     font-family: 'Open Sans', sans-serif;
     color: #353535;
 }
+
 .content h1 {
     text-align: center;
 }
+
 .content .content-footer p {
     color: #6d6d6d;
     font-size: 12px;
     text-align: center;
 }
+
 .content .content-footer p a {
     color: inherit;
     font-weight: bold;
@@ -28,6 +31,7 @@ body {
 .cs-item {
     margin-right: 5px;
 }
+
 /*	--------------------------------------------------
 :: Table Filter
 -------------------------------------------------- */
@@ -36,45 +40,57 @@ body {
     border: 1px solid #ddd;
     background-color: #fcfcfc;
 }
+
 .panel .btn-group {
     margin: 15px 0 30px;
 }
+
 .panel .btn-group .btn {
     transition: background-color .3s ease;
 }
+
 .table-filter {
     background-color: #fff;
 }
+
 .table-filter tbody tr:hover {
     cursor: pointer;
     background-color: #eee;
 }
+
 .table-filter tbody tr td {
     padding: 10px;
     vertical-align: middle;
     border-top-color: #eee;
 }
+
 .table-filter tbody tr.selected td {
     background-color: #eee;
 }
+
 .table-filter tr td:first-child {
     width: 38px;
 }
+
 .table-filter tr td:nth-child(2) {
     width: 35px;
 }
+
 .ckbox {
     position: relative;
 }
+
 .ckbox input[type="checkbox"] {
     opacity: 0;
 }
+
 .ckbox label {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
 }
+
 .ckbox label:before {
     content: '';
     top: 1px;
@@ -87,10 +103,12 @@ body {
     border: 1px solid #bbb;
     background-color: #fff;
 }
+
 .ckbox input[type="checkbox"]:checked + label:before {
     border-color: #2BBCDE;
     background-color: #2BBCDE;
 }
+
 .ckbox input[type="checkbox"]:checked + label:after {
     top: 3px;
     left: 3.5px;
@@ -100,32 +118,40 @@ body {
     font-family: 'Glyphicons Halflings';
     position: absolute;
 }
+
 .table-filter .star {
     color: #ccc;
     text-align: center;
     display: block;
 }
+
 .table-filter .star.star-checked {
     color: #F0AD4E;
 }
+
 .table-filter .star:hover {
     color: #ccc;
 }
+
 .table-filter .star.star-checked:hover {
     color: #F0AD4E;
 }
+
 .table-filter .media-photo {
     width: 35px;
 }
+
 .media-body {
     width: 100%;
     display: block;
     /* Had to use this style to force the div to expand (wasn't necessary with my bootstrap version 3.3.6) */
 }
+
 .media-meta {
     font-size: 11px;
     color: #999;
 }
+
 .media .title {
     color: #07C;
     font-size: 18px;
@@ -133,32 +159,38 @@ body {
     line-height: normal;
     margin: 0;
 }
+
 .media .title:hover {
-	color: #3af;
+    color: #3af;
 }
+
 .media .title span {
     font-size: .8em;
     margin-right: 20px;
 }
+
 .media .title span.pagado {
     color: #5cb85c;
 }
+
 .media .title span.pendiente {
     color: #f0ad4e;
 }
+
 .media .title span.cancelado {
     color: #d9534f;
 }
+
 .media .summary {
     font-size: 14px;
 }
 
 .media-download {
-	color: #0095ff;
+    color: #0095ff;
     border: 1px solid #0095ff;
-    background-color: rgba(0,119,204,0) !important;
-	border-radius: 2px;
-	display: inline-block;
+    background-color: rgba(0, 119, 204, 0) !important;
+    border-radius: 2px;
+    display: inline-block;
     padding: .25em .4em;
     font-size: 75%;
     /* font-weight: 700; */
@@ -169,7 +201,7 @@ body {
 }
 
 .media-download:hover {
-	color: #005999;
+    color: #005999;
     background-color: #e6f4ff !important;
     border-color: #07c;
     box-shadow: none;
@@ -178,15 +210,18 @@ body {
 ul {
     list-style-type: none;
 }
+
 .ui-menu-item-wrapper {
     padding-top: 20px;
     font-size: 20px;
     color: black;
 }
+
 .ui-menu-item-wrapper:hover {
     color: #777777;
     cursor: pointer;
 }
+
 button,
 input,
 select,
@@ -208,11 +243,10 @@ pre h3 {
     font-size: 14px;
     line-height: 14px;
     background-color: #f6f8fa;
-    border: 1px solid rgba(27,31,35,0.15);
+    border: 1px solid rgba(27, 31, 35, 0.15);
     border-bottom: 0;
     border-radius: 3px 3px 0 0;
 }
-
 
 /*    --------------------------------------------------
 :: General :: HOME :: S :: sharecode/home.html
@@ -221,7 +255,7 @@ nav {
     box-shadow: none !important;
 }
 
-nav.navbar{
+nav.navbar {
     display: flow-root !important;
 }
 
@@ -233,7 +267,7 @@ nav.navbar{
     width: 100%;
 }
 
-.cs-login{
+.cs-login {
     width: 500px;
     position: fixed;
     right: 0;
@@ -243,33 +277,32 @@ nav.navbar{
     z-index: 9999;
 }
 
-.ttuni-search
-{
-	margin: 20px 0px 10px 0px;
+.ttuni-search {
+    margin: 20px 0px 10px 0px;
 }
-.google-search:focus
-{
-	box-shadow:silver 0 2px 10px; 
-	border-color: silver;
+
+.google-search:focus {
+    box-shadow: silver 0 2px 10px;
+    border-color: silver;
 }
-.google-form .btn-group
-{
-	padding: 20px 0;
+
+.google-form .btn-group {
+    padding: 20px 0;
 }
-.btn-group>.btn
-{
-	border-radius: 0;
-	margin: 0 10px;
+
+.btn-group > .btn {
+    border-radius: 0;
+    margin: 0 10px;
 }
-.btn
-{
+
+.btn {
     /*font-weight: 600;*/
     padding: 8px 16px;
 }
 
 .cs-group {
-    width:auto;
-    margin-bottom:15px;    
+    width: auto;
+    margin-bottom: 15px;
 }
 
 .cs-group img {
@@ -279,7 +312,6 @@ nav.navbar{
 .cs-group input#search-term {
     width: 90%;
 }
-
 
 /*    --------------------------------------------------
 :: General :: NAV-FILTER :: S :: sharecode/nav-filter.html
@@ -291,27 +323,26 @@ nav.navbar{
 }
 
 .dropdown {
-    width:auto;
-    float:left;
-    margin-right:10px;
+    width: auto;
+    float: left;
+    margin-right: 10px;
 }
 
 @media only screen and (min-width: 992px) {
     .jumbotron {
-        width:800px;
-        margin-bottom:0px;
+        width: 800px;
+        margin-bottom: 0px;
         margin-left: 140px;
         border-radius: 0px;
-        padding:20px 20px 0px 10px;
-		border-bottom: 1px solid silver;
+        padding: 20px 20px 0px 10px;
+        border-bottom: 1px solid silver;
         box-shadow: none;
     }
-}   
-
-.navbar-menu-left {
-    padding-top:15px;
 }
 
+.navbar-menu-left {
+    padding-top: 15px;
+}
 
 /*menu right :: s*/
 .siderbar {
@@ -340,15 +371,15 @@ nav.navbar{
 nav.navbar.navbar-expand-sm.navbar-light.bg-faded {
     float: right;
     background: none;
-    padding-right:0px !important;
+    padding-right: 0px !important;
 }
 
 .nav-content {
     background: #fff;
     border: 1px solid #ccc;
-    border-color: rgba(0,0,0,.2);
+    border-color: rgba(0, 0, 0, .2);
     color: #000;
-    box-shadow: 0 2px 10px rgba(0,0,0,.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .2);
     border-radius: 2px;
     right: 0px;
     top: 50px;
@@ -370,7 +401,7 @@ nav.navbar.navbar-expand-sm.navbar-light.bg-faded {
     margin-top: 12px;
 }
 
-#slide-submenu{
+#slide-submenu {
     background: rgba(0, 0, 0, 0.45);
     display: inline-block;
     padding: 0 8px;
@@ -380,14 +411,15 @@ nav.navbar.navbar-expand-sm.navbar-light.bg-faded {
 
 .navbar-form {
     width: 100%;
-    float:left;
-    padding:10px 15px 0px 15px;
+    float: left;
+    padding: 10px 15px 0px 15px;
 }
 
-@media only screen and (max-width: 768px){
+@media only screen and (max-width: 768px) {
     .navbar {
         padding: 8px !important;
     }
+
     .navbar-form {
         padding: 10px 0px;
         margin: 0px;
@@ -400,30 +432,30 @@ nav.navbar.navbar-expand-sm.navbar-light.bg-faded {
     width: 100%;
     padding-left: 10px;
 }
-/*menu right :: e*/
 
+/*menu right :: e*/
 
 /*login form :: s*/
 .form-elegant .font-small {
     font-size: 0.8rem;
 }
-  
+
 .form-elegant .z-depth-1a {
     -webkit-box-shadow: 0 2px 5px 0 rgba(55, 161, 255, 0.26), 0 4px 12px 0 rgba(121, 155, 254, 0.25);
-    box-shadow: 0 2px 5px 0 rgba(55, 161, 255, 0.26), 0 4px 12px 0 rgba(121, 155, 254, 0.25); 
+    box-shadow: 0 2px 5px 0 rgba(55, 161, 255, 0.26), 0 4px 12px 0 rgba(121, 155, 254, 0.25);
 }
-  
+
 .form-elegant .z-depth-1-half,
 .form-elegant .btn:hover {
     -webkit-box-shadow: 0 5px 11px 0 rgba(85, 182, 255, 0.28), 0 4px 15px 0 rgba(36, 133, 255, 0.15);
-    box-shadow: 0 5px 11px 0 rgba(85, 182, 255, 0.28), 0 4px 15px 0 rgba(36, 133, 255, 0.15); 
+    box-shadow: 0 5px 11px 0 rgba(85, 182, 255, 0.28), 0 4px 15px 0 rgba(36, 133, 255, 0.15);
 }
 
 button.navbar-toggler {
     padding-right: 0px;
 }
 
-@media only screen and (max-width: 768px){
+@media only screen and (max-width: 768px) {
     .btn-signin-text {
         display: none;
     }
@@ -437,7 +469,7 @@ button.navbar-toggler {
     }
 }
 
-@media only screen and (min-width: 769px){
+@media only screen and (min-width: 769px) {
     .btn-signin-text {
         display: block;
     }
@@ -447,30 +479,29 @@ button.navbar-toggler {
     }
 }
 
-@media only screen and (min-width: 769px){
+@media only screen and (min-width: 769px) {
     .cs-login-form .modal-dialog {
         max-width: 700px;
     }
 }
 
-@media only screen and (max-width: 768px){
+@media only screen and (max-width: 768px) {
     .cs-login-form .modal-dialog {
         max-width: 100%;
     }
 }
-/*login form :: e*/      
 
+/*login form :: e*/
 
 /*pagination*/
 .cs-pagination {
-    float:left;
+    float: left;
     width: 100%;
     height: auto;
     background: #f5f5f5;
     padding: 20px 0 20px 140px;
-	margin-top:10px;
+    margin-top: 10px;
 }
-
 
 @media only screen and (max-width: 992px) {
     .cs-pagination {
@@ -486,10 +517,10 @@ button.navbar-toggler {
     font-size: 16px;
 }
 
-@media only screen and (min-width: 992px){
-	.prj-wapper {
-		margin-left: 135px;
-	}
+@media only screen and (min-width: 992px) {
+    .prj-wapper {
+        margin-left: 135px;
+    }
 }
 
 .tt-tags {
@@ -515,16 +546,16 @@ button.navbar-toggler {
 .tt-tags .ele-tag:hover {
     color: #33658a;
     background-color: #cee0ed;
-    border-color: rgba(0,0,0,0);
+    border-color: rgba(0, 0, 0, 0);
     cursor: pointer;
 }
-
 
 .tt-tags span:hover {
     cursor: pointer;
 }
 
 .media-content {
+    font-size: 0.8rem;
     color: #6f6f6f;
 }
 
@@ -546,7 +577,6 @@ button.navbar-toggler {
     }
 }
 
-
 /*    --------------------------------------------------
 :: General :: MENU RIGHT :: S :: sharecode/header/menu-right.html
 -------------------------------------------------- */
@@ -555,13 +585,15 @@ button.navbar-toggler {
     line-height: 40px;
     border-radius: 20px;
     font-size: 15px;
-    margin-top:-5px;
+    margin-top: -5px;
 }
+
 .chip.chip-md img {
     height: 40px;
     width: 40px;
     border-radius: 20px;
 }
+
 .chip.chip-md .close {
     height: 42px;
     line-height: 42px;
@@ -573,10 +605,12 @@ button.navbar-toggler {
     line-height: 52px;
     border-radius: 26px;
 }
+
 .chip.chip-lg img {
     height: 52px;
     width: 52px;
 }
+
 .chip.chip-lg .close {
     height: 52px;
     line-height: 52px;
@@ -622,7 +656,7 @@ span.title {
 }
 
 a.nav-link.waves-effect.waves-light {
-    color: rgba(0,0,0,0.87);
+    color: rgba(0, 0, 0, 0.87);
     display: inline-block;
     font-size: 13px;
     margin: 8px 2px;
@@ -644,7 +678,7 @@ a.nav-link.waves-effect.waves-light {
     -webkit-animation: gb__a .2s;
     animation: gb__a .2s;
     border-bottom-color: #ccc;
-    border-bottom-color: rgba(0,0,0,.2);
+    border-bottom-color: rgba(0, 0, 0, .2);
     top: 36px;
 }
 
@@ -656,7 +690,7 @@ a.nav-link.waves-effect.waves-light {
 .tt-ac-bt {
     background: #f5f5f5;
     border-top: 1px solid #ccc;
-    border-color: rgba(0,0,0,.2);
+    border-color: rgba(0, 0, 0, .2);
     padding: 10px 0;
     width: 100%;
     display: table;
@@ -667,7 +701,7 @@ a.nav-link.waves-effect.waves-light {
     vertical-align: top;
     height: 96px;
     width: 96px;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .16), 0 2px 10px 0 rgba(0, 0, 0, .12);
     border-radius: 48px;
     float: left;
 }
@@ -700,8 +734,6 @@ a.nav-link.waves-effect.waves-light {
     overflow: hidden;
 }
 
-
-
 /*    --------------------------------------------------
 :: General :: WRAPER HEADER :: S
 -------------------------------------------------- */
@@ -715,33 +747,34 @@ a.nav-link.waves-effect.waves-light {
     width: auto;
 }
 
-.wrapper-header-tt-persenter .list_btn{
-    float:right;
+.wrapper-header-tt-persenter .list_btn {
+    float: right;
     position: relative;
     list-style: none;
     margin: 0 30px;
     display: flex;
 }
-.wrapper-header-tt-persenter .list_btn li{ 
+
+.wrapper-header-tt-persenter .list_btn li {
     list-style: none
 }
 
-.wrapper-header-tt-persenter .list_btn div{
+.wrapper-header-tt-persenter .list_btn div {
     position: absolute;
     right: 0;
     top: 40px;
     border: 1px solid #ccc;
     width: 376px;
-    box-shadow: 0 2px 10px rgba(0,0,0,.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .2);
     display: none;
 }
 
-.wrapper-header-tt-persenter.list_btn div> *{
+.wrapper-header-tt-persenter.list_btn div > * {
     padding: 20px;
 }
 
 .wrapper-header-tt-persenter .item01,
-.wrapper-header-tt-persenter .item02{
+.wrapper-header-tt-persenter .item02 {
     border-color: transparent;
     border-style: dashed dashed solid;
     border-width: 0 8.5px 8.5px;
@@ -754,45 +787,42 @@ a.nav-link.waves-effect.waves-light {
     animation: gb__a .2s;
 }
 
-.wrapper-header-tt-persenter .item01{
+.wrapper-header-tt-persenter .item01 {
     display: none;
     border-bottom-color: #fff;
     top: 32px;
 }
 
-.wrapper-header-tt-persenter .item02{
+.wrapper-header-tt-persenter .item02 {
     display: none;
     left: 6.5px;
     border-bottom-color: #ccc;
-    border-bottom-color: rgba(0,0,0,.2);
+    border-bottom-color: rgba(0, 0, 0, .2);
     top: 31px;
 }
 
-.wrapper-header-tt-persenter .list_items{
+.wrapper-header-tt-persenter .list_items {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
 }
 
-.wrapper-header-tt-persenter .list_items > *{
+.wrapper-header-tt-persenter .list_items > * {
     margin: 0 5px;
 }
 
-@keyframes gb__a{
-    0%{
+@keyframes gb__a {
+    0% {
         opacity: 0;
     }
-    100%{
+    100% {
         opacity: 1;
     }
 }
 
-
-
 /*    --------------------------------------------------
 :: General :: WRAPER HEADER :: E
 -------------------------------------------------- */
-
 
 /*    --------------------------------------------------
 :: General :: WRAPER BODY :: S
@@ -801,12 +831,10 @@ a.nav-link.waves-effect.waves-light {
     width: 100%;
     display: table;
 }
+
 /*    --------------------------------------------------
 :: General :: WRAPER BODY :: E
 -------------------------------------------------- */
-
-
-
 
 /*    --------------------------------------------------
 :: General :: NAV-HEADER :: sharecode/navbar-header.html :: S
@@ -823,30 +851,27 @@ a.nav-link.waves-effect.waves-light {
     float: left;
 }
 
-@media only screen and (max-width: 768px){
+@media only screen and (max-width: 768px) {
     .cs-search {
         width: 100%;
     }
 }
 
-@media only screen and (min-width: 768px){
+@media only screen and (min-width: 768px) {
     .cs-search {
         width: 470px;
     }
 }
 
-
-@media only screen and (min-width: 992px){
+@media only screen and (min-width: 992px) {
     .cs-search {
         width: 600px;
     }
 }
 
-
 /*    --------------------------------------------------
 :: General :: NAV-HEADER :: sharecode/navbar-header.html :: E
 -------------------------------------------------- */
-
 
 label:hover {
     color: #000;

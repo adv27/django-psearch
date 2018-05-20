@@ -2,8 +2,32 @@
 {% load app_filters %}
 {% block head %}
     {% load static from staticfiles %}
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'bower_components/components-font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'bower_components/bootstrap/dist/css/bootstrap.min.css' %}">
+    {#    <link rel="stylesheet" type="text/css" href="{% static 'bower_components/bootstrap-3.3.7/dist/css/' %}">#}
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.4.3/css/mdb.min.css">
+
+    <script type="text/javascript" src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bower_components/tether/dist/js/tether.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+
+    <link rel="stylesheet" href="{% static 'patents/styles/base.css' %}">
+    <link rel="stylesheet" href="{% static 'patents/styles/sharecode.css' %}">
+    {#    <link rel="stylesheet" type="text/css"#}
+    {#          href="{% static 'bower_components/bootstrap-3.3.7/dist/css/bootstrap.min.css' %}">#}
+    {#    <script type="text/javascript" src="{% static 'bower_components/jQuery/dist/jquery.min.js' %}"></script>#}
+    {#    <script type="text/javascript"#}
+    {#            src="{% static 'bower_components/bootstrap-3.3.7/dist/js/bootstrap.min.js' %}"></script>#}
     <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/rating.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/style.css' %}">
 {% endblock %}
+
+{% block nav %}
+    {% include 'patents/includes/navbar_search.html' %}
+{% endblock %}
+
 {% block body %}
     {% if patent %}
         <h1>Search time {{ time }}</h1>
@@ -32,22 +56,34 @@
                 <input type="hidden" name="pid" value="{{ patent.id }}">
             </div>
         {% endif %}
-        {% for title in rate_titles reversed %}
-            <div id="reviewStars-input" style="width: 100%">
-                {% for title in rate_titles reversed %}
-                    <input id="star-{{ forloop.revcounter0 }}"
-                           type="radio"
-                           value="{{ forloop.revcounter }}"
-                            {% if forloop.parentloop.revcounter == forloop.revcounter %} checked="checked"{% endif %}/>
-                    <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>
-                {% endfor %}
-                <h1>
-                    {% if rate_count|get_item:forloop.revcounter %}
-                        {{ rate_count|get_item:forloop.revcounter }}
-                    {% else %}
-                        0
-                    {% endif %}
-                </h1>
+        {#        {% for title in rate_titles reversed %}#}
+        {#            <div id="reviewStars-input" style="width: 100%">#}
+        {#                {% for title in rate_titles reversed %}#}
+        {#                    <input id="star-{{ forloop.revcounter0 }}"#}
+        {#                           type="radio"#}
+        {#                           value="{{ forloop.revcounter }}"#}
+        {#                            {% if forloop.parentloop.revcounter == forloop.revcounter %} checked="checked"{% endif %}/>#}
+        {#                    <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>#}
+        {#                {% endfor %}#}
+        {#                <h1>#}
+        {#                    {% if rate_count|get_item:forloop.revcounter %}#}
+        {#                        {{ rate_count|get_item:forloop.revcounter }}#}
+        {#                    {% else %}#}
+        {#                        0#}
+        {#                    {% endif %}#}
+        {#                </h1>#}
+        {#            </div>#}
+        {#        {% endfor %}#}
+        {% for r in '12345' %}
+            <h1>
+                {% if rate_count|get_item:forloop.counter %}
+                    {{ rate_count|get_item:forloop.counter }}
+                {% else %}
+                    0
+                {% endif %}
+            </h1>
+            <div class="star-ratings-sprite">
+                <span style="width:{{ r|to_int|x20 }}%" class="star-ratings-sprite-rating"></span>
             </div>
         {% endfor %}
     {% endif %}
@@ -61,5 +97,105 @@
             <h1>No rating yet</h1>
         </div>
     {% endif %}
-    <script type="text/javascript" src="{% static 'patents/scripts/rating.js' %}" async></script>
+    {% comment %}
+        Rating count
+    {% endcomment %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-md-6">
+                {#                <div class="well well-sm">#}
+                <div class="card card-block bg-faded">
+                    <div class="row">
+                        <div class="col-xs-12 col-md-6 text-center">
+                            <h1 class="rating-num">
+                                4.0</h1>
+                            <div class="rating">
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star"></span>
+                                <span class="fa fa-star-o"></span>
+                            </div>
+                            <div>
+                                <span class="fa fa-user"></span>1,050,008 total
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-6">
+                            <div class="row rating-desc">
+                                <div class="col-xs-3 col-md-3 text-right">
+                                    <span class="fa fa-star"></span>5
+                                </div>
+                                <div class="col-xs-8 col-md-9">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success progress-bar-striped" role="progressbar"
+                                             aria-valuenow="20"
+                                             aria-valuemin="0" aria-valuemax="100" style="width: 80%">
+                                            <span class="sr-only">80%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end 5 -->
+                                <div class="col-xs-3 col-md-3 text-right">
+                                    <span class="fa fa-star"></span>4
+                                </div>
+                                <div class="col-xs-8 col-md-9">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             aria-valuenow="20"
+                                             aria-valuemin="0" aria-valuemax="100" style="width: 60%">
+                                            <span class="sr-only">60%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end 4 -->
+                                <div class="col-xs-3 col-md-3 text-right">
+                                    <span class="fa fa-star"></span>3
+                                </div>
+                                <div class="col-xs-8 col-md-9">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                             aria-valuenow="20"
+                                             aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                                            <span class="sr-only">40%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end 3 -->
+                                <div class="col-xs-3 col-md-3 text-right">
+                                    <span class="fa fa-star"></span>2
+                                </div>
+                                <div class="col-xs-8 col-md-9">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" role="progressbar"
+                                             aria-valuenow="20"
+                                             aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+                                            <span class="sr-only">20%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end 2 -->
+                                <div class="col-xs-3 col-md-3 text-right">
+                                    <span class="fa fa-star"></span>1
+                                </div>
+                                <div class="col-xs-8 col-md-9">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-danger" role="progressbar"
+                                             aria-valuenow="80"
+                                             aria-valuemin="0" aria-valuemax="100" style="width: 15%">
+                                            <span class="sr-only">15%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end 1 -->
+                            </div>
+                            <!-- end row -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <html>
+    {#    {% include 'patents/includes/rating_summarize.html' %}#}
+    </html>
 {% endblock %}
