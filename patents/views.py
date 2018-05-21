@@ -310,9 +310,10 @@ class FileFieldView(FormView):
 
             'filter the files list, if the file name already in the db, then skip it'
             files = (f for f in files if Patent.objects.filter(filename=f.name).first() is None)
-            with Pool(processes=15) as pool:  # using 5 processes to handle uploaded files
+            with Pool(processes=15) as pool:  # using 15 processes to handle uploaded files
                 file_list = ((f.name, f.read()) for f in files)
                 pool.map(handle_uploaded_file_unpack, file_list)
+                # pool.map(a_handle_uploaded_file, files)
                 pool.close()
                 pool.join()
             print('{}'.format(time.time() - t0))

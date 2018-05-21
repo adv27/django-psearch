@@ -1,4 +1,8 @@
 from .models import *
+from django.core.files.storage import Storage, FileSystemStorage
+from django.core.files import File
+from django.core.files.base import ContentFile
+import tempfile
 
 
 def create_user_validation(username, password):
@@ -26,8 +30,47 @@ def handle_uploaded_file(filename, filestream):
         print('{} - {}'.format(filename, e))
         return
     # if save_mongo is success
-    with open(r'C:\Users\vdanh\Desktop\tmp\{}'.format(filename), 'wb') as f:
-        f.write(filestream)
+    # with open(r'C:\Users\vdanh\Desktop\tmp\{}'.format(filename), 'wb') as f:
+    #     f.write(filestream)
+
+    f1 = ContentFile(filestream)
+    fs = FileSystemStorage(location='/data/upload')
+    fs.save(name=filename, content=f1)
+
+    # with tempfile.TemporaryFile(mode='wb') as tempf:
+    #     tempf.write(filestream)
+    #     tempf.seek(0)
+    #     # with FileSystemStorage(location='/data/upload') as fs:
+    #     #     fs.save(name=filename, content=filestream)
+    #     fff = File(tempf)
+    #     # print('{name} Size: {size}'.format(name=filename, size=fff.size))
+    #     # fs = FileSystemStorage(location='/data/upload')
+    #     # fs.save(name=filename, content=fff)
+    #     # print('Saved: {}'.format(filename))
+    #     # for chunk in fff.chunks():
+    #     #     print(len(chunk))
+    #     Storage.save(name=filename, content=fff)
+
+
+def a_handle_uploaded_file(file):
+    import xmltodict
+    import json
+
+    _dict = xmltodict.parse(file.read())
+    _json = json.dumps(_dict)
+    doc = json.loads(_json)
+
+    filename = file.name
+    try:
+        save_mongo(filename=filename, doc=doc)
+    except Exception as e:
+        print('{} - {}'.format(filename, e))
+        return
+    # if save_mongo is success
+    # with open(r'C:\Users\vdanh\Desktop\tmp\{}'.format(filename), 'wb') as f:
+    #     f.write(filestream)
+    fs = FileSystemStorage(location='/data/upload')
+    fs.save(name=filename, content=file)
     print('Saved: {}'.format(filename))
 
 
