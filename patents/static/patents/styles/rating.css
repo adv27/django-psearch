@@ -7,7 +7,7 @@
 }
 
 #reviewStars-input {
-
+    width: 100%;
     /*fix floating problems*/
     overflow: hidden;
     *zoom: 1;
@@ -39,7 +39,7 @@
     background-position: 0 0;
     height: 40px;
     width: 43px;
-    float: right;
+    /*float: right;*/
     cursor: pointer;
     margin-right: 10px;
 

@@ -427,9 +427,14 @@ nav.navbar.navbar-expand-sm.navbar-light.bg-faded {
 }
 
 .input-alternate {
+    /*height: 2.5rem !important;*/
+    /*margin: 0px !important;*/
+    /*width: 100%;*/
+    /*padding-left: 10px;*/
     height: 2.5rem !important;
-    margin: 0px !important;
+    margin: 0 !important;
     width: 100%;
+    padding-right: 120px;
     padding-left: 10px;
 }
 

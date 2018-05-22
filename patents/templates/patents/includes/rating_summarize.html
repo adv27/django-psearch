@@ -4,19 +4,33 @@
 {% endcomment %}
 <div class="container">
     <div class="row">
-        <div class="col-xs-12 col-md-6">
+        <div class="col-xs-12 col-md-12">
             {#                <div class="well well-sm">#}
             <div class="card card-block bg-faded">
                 <div class="row">
                     <div class="col-xs-12 col-md-6 text-center">
                         <h1 class="rating-num">{{ rate_avg }}</h1>
-                        <div class="rating">
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star-o"></span>
-                        </div>
+                        {#                        <div class="rating">#}
+                        {#                            <span class="fa fa-star"></span>#}
+                        {#                            <span class="fa fa-star"></span>#}
+                        {#                            <span class="fa fa-star"></span>#}
+                        {#                            <span class="fa fa-star"></span>#}
+                        {#                            <span class="fa fa-star-o"></span>#}
+                        {#                        </div>#}
+                        {% if request.session.user_id %}
+                            <div id="reviewStars-input">
+                                {% for title in rate_titles reversed %}
+                                    <input id="star-{{ forloop.counter0 }}"
+                                           type="radio"
+                                           name="reviewStars"
+                                           value="{{ forloop.counter }}"
+                                            {% if user_rating == forloop.revcounter %} checked="checked"{% endif %}/>
+                                    <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>
+                                {% endfor %}
+
+                                <input type="hidden" name="pid" value="{{ patent.id }}">
+                            </div>
+                        {% endif %}
                         <div>
                             <span class="fa fa-user"></span>{{ patent|rate_times|number_with_commas }} total
                         </div>
