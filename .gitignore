@@ -105,3 +105,6 @@ venv.bak/
 
 # bower
 bower_components/
+
+# data folder
+data/

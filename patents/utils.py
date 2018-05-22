@@ -1,8 +1,7 @@
-from .models import *
-from django.core.files.storage import Storage, FileSystemStorage
-from django.core.files import File
 from django.core.files.base import ContentFile
-import tempfile
+from django.core.files.storage import FileSystemStorage
+
+from .models import *
 
 
 def create_user_validation(username, password):
@@ -26,30 +25,13 @@ def handle_uploaded_file(filename, filestream):
     doc = json.loads(_json)
     try:
         save_mongo(filename=filename, doc=doc)
+        # if save_mongo is success
+        # save the file uploaded to the MEDIA_ROOT
+        cf = ContentFile(filestream)
+        fs = FileSystemStorage()
+        fs.save(name=filename, content=cf)
     except Exception as e:
-        print('{} - {}'.format(filename, e))
-        return
-    # if save_mongo is success
-    # with open(r'C:\Users\vdanh\Desktop\tmp\{}'.format(filename), 'wb') as f:
-    #     f.write(filestream)
-
-    f1 = ContentFile(filestream)
-    fs = FileSystemStorage(location='/data/upload')
-    fs.save(name=filename, content=f1)
-
-    # with tempfile.TemporaryFile(mode='wb') as tempf:
-    #     tempf.write(filestream)
-    #     tempf.seek(0)
-    #     # with FileSystemStorage(location='/data/upload') as fs:
-    #     #     fs.save(name=filename, content=filestream)
-    #     fff = File(tempf)
-    #     # print('{name} Size: {size}'.format(name=filename, size=fff.size))
-    #     # fs = FileSystemStorage(location='/data/upload')
-    #     # fs.save(name=filename, content=fff)
-    #     # print('Saved: {}'.format(filename))
-    #     # for chunk in fff.chunks():
-    #     #     print(len(chunk))
-    #     Storage.save(name=filename, content=fff)
+        print('{} - Exception: {} - {}'.format(__name__, filename, e))
 
 
 def a_handle_uploaded_file(file):
@@ -69,7 +51,7 @@ def a_handle_uploaded_file(file):
     # if save_mongo is success
     # with open(r'C:\Users\vdanh\Desktop\tmp\{}'.format(filename), 'wb') as f:
     #     f.write(filestream)
-    fs = FileSystemStorage(location='/data/upload')
+    fs = FileSystemStorage()
     fs.save(name=filename, content=file)
     print('Saved: {}'.format(filename))
 

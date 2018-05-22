@@ -62,12 +62,13 @@
                                         </div>
                                     </span>
                                 </div>
+                                {% comment %}
+                                    Download section
+                                {% endcomment %}
                                 <div class="float-right">
-                                    <!-- if user not login, when lick to btn download to open modal login. In else case, open modal download -->
-                                    <span class="media-download" data-toggle="modal" data-target="#login-form"
-                                          data-placement="top">
-                                        <i class="fa fa-download" aria-hidden="true"
-                                           style="margin-right:5px;"></i>Tải về
+                                    <span class="media-download" data-placement="top">
+                                         <a class="fa fa-download" aria-hidden="true" style="margin-right:5px;"
+                                            href="{% url 'patents:download' patent.id %}" download="">Tải về</a>
                                     </span>
                                 </div>
                             </h6>

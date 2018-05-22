@@ -1,6 +1,9 @@
 from django import template
 
-from ..models import User
+from ..models import (
+    User,
+    Rate,
+)
 
 register = template.Library()
 
@@ -23,3 +26,14 @@ def get_username(uid):
 @register.filter
 def x20(rate):
     return rate * 20
+
+
+@register.filter
+# 1000 -> 1,000
+def number_with_commas(n):
+    return '{:,}'.format(n)
+
+
+@register.filter
+def rate_times(patent):
+    return len(Rate.objects.filter(patent_id=patent))

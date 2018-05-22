@@ -1,9 +1,11 @@
 import time
+import os
 
 from django.core.paginator import Paginator
 from django.http import (Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse)
 from django.shortcuts import (redirect, render, reverse)
 from django.views.generic.edit import FormView
+from django.conf import settings
 
 from .forms import FileFieldForm
 from .utils import *
@@ -16,6 +18,24 @@ def index(request):
 
     }
     return render(request, template_name='patents/index.html', context=context)
+
+
+def download(request, pat_id):
+    try:
+        p = Patent.objects.get(id=pat_id)
+        filename = p.filename
+        file_path = os.path.join(settings.MEDIA_ROOT, filename)
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='text/xml')
+                response['Content-Disposition'] = 'attachment; filename={}'.format(os.path.basename(file_path))
+                return response
+        raise Http404()
+    except DoesNotExist:
+        return JsonResponse({
+            'error': True,
+            'message': 'File not exits'
+        })
 
 
 def search(request):
