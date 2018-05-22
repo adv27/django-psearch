@@ -1,14 +1,26 @@
-import time
 import os
+import time
 
 from django.core.paginator import Paginator
 from django.http import (Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse)
 from django.shortcuts import (redirect, render, reverse)
 from django.views.generic.edit import FormView
-from django.conf import settings
 
 from .forms import FileFieldForm
 from .utils import *
+
+SORT_BY_MAPPING = {
+    '0': '$text_score',
+    '1': '-rate',
+    '2': '-view',
+}
+
+SEARCH_FIELD_MAPPING = {
+    '0': 'all_fields',
+    '1': 'title',
+    '2': 'abstract',
+    '3': 'content',
+}
 
 
 # Create your views here.
@@ -43,11 +55,28 @@ def search(request):
     query = request.GET.get('q')
     if query is not None:
         if query is not '':
-            # patent_list = Patent.objects.search_text(query).order_by('$text_score')
-            patent_list = Patent.objects.search_text(query).order_by('-rate')
-            # patent_list = Patent.objects.search_text(query).order_by('-view')
+            search_field = request.GET.get('field')
+            if search_field is None or search_field == '' or search_field == '0':
+                patent_list = Patent.objects.search_text(query)
+            elif search_field in SEARCH_FIELD_MAPPING:
+                if search_field == '1':
+                    # title
+                    patent_list = Patent.objects(title__icontains=query)
+                if search_field == '1':
+                    # abstract
+                    patent_list = Patent.objects(abstract__icontains=query)
+                if search_field == '1':
+                    # title
+                    patent_list = Patent.objects(content__icontains=query)
         else:
             patent_list = Patent.objects.all()
+
+        # sort
+        order_by = request.GET.get('ord')
+        if order_by is None or order_by == '':
+            patent_list.order_by('$text_score')
+        elif order_by in SORT_BY_MAPPING:
+            patent_list.order_by(SORT_BY_MAPPING.get(order_by))
 
         if request.session.get('user_id', False):
             uid = request.session.get('user_id')

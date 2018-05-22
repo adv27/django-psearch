@@ -81,6 +81,9 @@ DATABASES = {
 }
 
 # MONGODB
+MONGODB_HOST = 'localhost'
+MONGODB_PORT = 27017
+MONGODB_NAME = 'patent'
 
 _MONGODB_HOST = 'localhost:27017'
 _MONGODB_NAME = 'patent'

@@ -1,5 +1,6 @@
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 
 from .models import *
 
@@ -88,7 +89,10 @@ def save_mongo(filename, doc):
         '''
         Using pymongo client for multi processes purpose
         '''
-        client = pymongo.MongoClient('localhost', 27017).patent
+        host = settings.MONGODB_HOST
+        port = settings.MONGODB_PORT
+        db = settings.MONGODB_NAME
+        client = pymongo.MongoClient(host, port)[db]
         db = client.patent
         result = db.insert_one(patent)
         print(result.inserted_id)
