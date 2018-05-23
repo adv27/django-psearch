@@ -1,5 +1,6 @@
 import os
 import time
+import urllib.parse as urlparse
 
 from django.core.paginator import Paginator
 from django.http import (Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse)
@@ -9,10 +10,11 @@ from django.views.generic.edit import FormView
 from .forms import FileFieldForm
 from .utils import *
 
-SORT_BY_MAPPING = {
-    '0': '$text_score',
-    '1': '-rate',
-    '2': '-view',
+SEARCH_FIELDS = {
+    0: 'All',
+    1: 'Title',
+    2: 'Abstract',
+    3: 'Content',
 }
 
 SEARCH_FIELD_MAPPING = {
@@ -20,6 +22,18 @@ SEARCH_FIELD_MAPPING = {
     '1': 'title',
     '2': 'abstract',
     '3': 'content',
+}
+
+SORT_BY_FIELDS = {
+    0: 'Highest Text Score',
+    1: 'Highest Rate',
+    2: 'Highest View',
+}
+
+SORT_BY_MAPPING = {
+    '0': '$text_score',
+    '1': '-rate',
+    '2': '-view',
 }
 
 
@@ -53,30 +67,27 @@ def download(request, pat_id):
 def search(request):
     t0 = time.time()
     query = request.GET.get('q')
+    patent_list = None
     if query is not None:
         if query is not '':
             search_field = request.GET.get('field')
             if search_field is None or search_field == '' or search_field == '0':
+                # patent_list = Patent.objects.search_text(query)
                 patent_list = Patent.objects.search_text(query)
             elif search_field in SEARCH_FIELD_MAPPING:
-                if search_field == '1':
-                    # title
-                    patent_list = Patent.objects(title__icontains=query)
-                if search_field == '1':
-                    # abstract
-                    patent_list = Patent.objects(abstract__icontains=query)
-                if search_field == '1':
-                    # title
-                    patent_list = Patent.objects(content__icontains=query)
+                sss = {
+                    '{field}__icontains'.format(field=SEARCH_FIELD_MAPPING[search_field]): query
+                }
+                patent_list = Patent.objects(**sss)
         else:
             patent_list = Patent.objects.all()
 
         # sort
         order_by = request.GET.get('ord')
-        if order_by is None or order_by == '':
-            patent_list.order_by('$text_score')
-        elif order_by in SORT_BY_MAPPING:
-            patent_list.order_by(SORT_BY_MAPPING.get(order_by))
+        if order_by is not None and order_by != '':
+            if order_by in SORT_BY_MAPPING:
+                patent_list = patent_list.order_by(SORT_BY_MAPPING.get(order_by))
+        # patent_list.order_by('-vote')
 
         if request.session.get('user_id', False):
             uid = request.session.get('user_id')
@@ -129,7 +140,15 @@ def search(request):
     else:  # case 3
         pages = [x for x in range(page_no - 5, page_no + 6)]
 
+    parsed = urlparse.urlparse(request.build_absolute_uri())
+    queries_dict = urlparse.parse_qs(parsed.query, keep_blank_values=True)
+    queries_dict.pop('page', None)
+    query_string = urlparse.urlencode(queries_dict, doseq=True)
+
     context = {
+        'query_string': query_string,
+        'search_fields': SEARCH_FIELDS,
+        'sort_fields': SORT_BY_FIELDS,
         'patents': patents,
         'pages': pages,
         'time': time.time() - t0,
@@ -199,10 +218,8 @@ def detail(request, pat_id):
         pass
 
     # Get rates related to this patent
-    from collections import Counter
     rates = Rate.objects.filter(patent_id=p)
-    c = Counter(list(map(lambda _r: _r.rating, rates)))
-    rate_count = dict(c)
+    rate_count = get_rate_percentage(rates=rates)
 
     # Get average rate of this patent
     rate_avg = p.rate
@@ -210,6 +227,7 @@ def detail(request, pat_id):
     rate_titles = ['bad', 'poor', 'regular', 'good', 'gorgeous']
 
     context = {
+        'search_fields': SEARCH_FIELDS,
         'patent': p,
         'time': time_query,
         'user_rating': r.rating if r is not None else None,
@@ -260,9 +278,9 @@ def create_account(request):
 
 
 def change_password_account(request):
-    '''
+    """
     - Checking session to make sure that user have been logged in
-    '''
+    """
     if request.method == 'POST':
         uid = request.session.get('user_id', False)
         if uid:
@@ -324,11 +342,19 @@ def rate(request):
                 p.rate = mean(list(map(lambda _r: _r.rating, rates)))
                 p.save()
 
+                from .templatetags.app_filters import rate_times
+                rate_times = rate_times(p)
+
+                rate_count = get_rate_percentage(rates)
+
                 jsonRes = JsonResponse({
                     'uid': str(r.user_id.id),
                     'pid': str(r.patent_id.id),
                     'rating': r.rating,
-                    'date': r.date
+                    'rate_avg': p.rate,
+                    'date': r.date,
+                    'rate_times': rate_times,
+                    'rate_count': rate_count,
                 })
                 return jsonRes
             else:

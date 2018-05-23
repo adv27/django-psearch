@@ -37,3 +37,8 @@ def number_with_commas(n):
 @register.filter
 def rate_times(patent):
     return len(Rate.objects.filter(patent_id=patent))
+
+
+@register.filter
+def get_progress_width(dictionary, star_point):
+    return dictionary.get(star_point, 0)

@@ -33,6 +33,24 @@
 {% block body %}
     <div class="container cs-wapper">
         <h1>Search time {{ time }}</h1>
+        <div class="jumbotron">
+
+            <div class="col-md-12 patent-navbar">
+                {#                <a href="javascript:void(0)" class="">Home</a>#}
+                {#                <a href="javascript:void(0)" class="">Pricing</a>#}
+                {#                <a href="javascript:void(0)" class="">Disabled</a>#}
+                {% spaceless %}
+                    {% for value, text in sort_fields.items %}
+                        <a href="{% if query_string %}
+                        ?{{ query_string }}&ord={{ value }}
+                    {% else %}
+                    javascript:void(0);
+                    {% endif %}" class="patent-sortby">{{ text }}</a>
+                    {% endfor %}
+                {% endspaceless %}
+            </div>
+        </div>
+
         {% comment %}
             Display list patents
         {% endcomment %}
@@ -89,7 +107,7 @@
                     {% if patents.has_other_pages %}
                         {% if patents.number !=  1 %}
                             <li class="page-item">
-                                <a href="?q={{ query }}" class="page-link waves-effect waves-effect">
+                                <a href="?{{ query_string }}" class="page-link waves-effect waves-effect">
                                     First
                                 </a>
                             </li>
@@ -97,7 +115,7 @@
                         {% if patents.has_previous %}
                             <li class="page-item">
                                 <a class="page-link waves-effect waves-effect"
-                                   href="?page={{ patents.previous_page_number }}&q={{ query }}">
+                                   href="?{{ query_string }}&page={{ patents.previous_page_number }}">
                                     &laquo;
                                 </a>
                             </li>
@@ -110,19 +128,19 @@
                                 </li>
                             {% else %}
                                 <li class="page-item">
-                                    <a href="?page={{ i }}&q={{ query }}"
+                                    <a href="?{{ query_string }}&page={{ i }}"
                                        class="page-link waves-effect waves-effect">{{ i }}</a>
                                 </li>
                             {% endif %}
                         {% endfor %}
 
                         {% if patents.has_next %}
-                            <li class="page-item"><a href="?page={{ patents.next_page_number }}&q={{ query }}"
+                            <li class="page-item"><a href="?{{ query_string }}&page={{ patents.next_page_number }}"
                                                      class="page-link waves-effect waves-effect">&raquo;</a></li>
                         {% endif %}
                         {% if patents.number !=  patents.paginator.num_pages %}
                             <li class="page-item">
-                                <a href="?page={{ patents.paginator.num_pages }}&q={{ query }}"
+                                <a href="?{{ query_string }}&page={{ patents.paginator.num_pages }}"
                                    class="page-link waves-effect waves-effect">
                                     Last
                                 </a>

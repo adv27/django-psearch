@@ -16,7 +16,11 @@
     position: relative;
     float: left;
 }
-
+.reviewStars-group {
+    position: relative;
+    margin: auto;
+    width: 270px;
+}
 #reviewStars-input input {
     filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
     opacity: 0;
@@ -39,7 +43,7 @@
     background-position: 0 0;
     height: 40px;
     width: 43px;
-    /*float: right;*/
+    float: right;
     cursor: pointer;
     margin-right: 10px;
 
@@ -76,3 +80,4 @@
 #reviewStars-input #star-5 {
     left: 265px;
 }
+

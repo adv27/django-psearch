@@ -9,7 +9,7 @@
             <div class="card card-block bg-faded">
                 <div class="row">
                     <div class="col-xs-12 col-md-6 text-center">
-                        <h1 class="rating-num">{{ rate_avg }}</h1>
+                        <h1 class="rating-num" id="rate-avg">{{ rate_avg }}</h1>
                         {#                        <div class="rating">#}
                         {#                            <span class="fa fa-star"></span>#}
                         {#                            <span class="fa fa-star"></span>#}
@@ -19,19 +19,23 @@
                         {#                        </div>#}
                         {% if request.session.user_id %}
                             <div id="reviewStars-input">
-                                {% for title in rate_titles reversed %}
-                                    <input id="star-{{ forloop.counter0 }}"
-                                           type="radio"
-                                           name="reviewStars"
-                                           value="{{ forloop.counter }}"
-                                            {% if user_rating == forloop.revcounter %} checked="checked"{% endif %}/>
-                                    <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>
-                                {% endfor %}
+                                <div class="reviewStars-group">
+
+                                    {% for title in rate_titles reversed %}
+                                        <input id="star-{{ forloop.revcounter0 }}"
+                                               type="radio"
+                                               name="reviewStars"
+                                               value="{{ forloop.revcounter }}"
+                                                {% if user_rating == forloop.revcounter %}
+                                               checked="checked"{% endif %}/>
+                                        <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>
+                                    {% endfor %}
+                                </div>
 
                                 <input type="hidden" name="pid" value="{{ patent.id }}">
                             </div>
                         {% endif %}
-                        <div>
+                        <div id="rate-times">
                             <span class="fa fa-user"></span>{{ patent|rate_times|number_with_commas }} total
                         </div>
                     </div>
@@ -44,8 +48,9 @@
                                 <div class="progress">
                                     <div class="progress-bar bg-success progress-bar-striped" role="progressbar"
                                          aria-valuenow="20"
-                                         aria-valuemin="0" aria-valuemax="100" style="width: 80%">
-                                        <span class="sr-only">80%</span>
+                                         aria-valuemin="0" aria-valuemax="100"
+                                         style="width: {{ rate_count|get_progress_width:5 }}%">
+                                        <span class="sr-only">{{ rate_count|get_progress_width:5 }}%</span>
                                     </div>
                                 </div>
                             </div>
@@ -57,8 +62,9 @@
                                 <div class="progress">
                                     <div class="progress-bar bg-success" role="progressbar"
                                          aria-valuenow="20"
-                                         aria-valuemin="0" aria-valuemax="100" style="width: 60%">
-                                        <span class="sr-only">60%</span>
+                                         aria-valuemin="0" aria-valuemax="100"
+                                         style="width: {{ rate_count|get_progress_width:4 }}%">
+                                        <span class="sr-only">{{ rate_count|get_progress_width:4 }}%</span>
                                     </div>
                                 </div>
                             </div>
@@ -70,8 +76,9 @@
                                 <div class="progress">
                                     <div class="progress-bar bg-info" role="progressbar"
                                          aria-valuenow="20"
-                                         aria-valuemin="0" aria-valuemax="100" style="width: 40%">
-                                        <span class="sr-only">40%</span>
+                                         aria-valuemin="0" aria-valuemax="100"
+                                         style="width: {{ rate_count|get_progress_width:3 }}%">
+                                        <span class="sr-only">{{ rate_count|get_progress_width:3 }}%</span>
                                     </div>
                                 </div>
                             </div>
@@ -83,8 +90,9 @@
                                 <div class="progress">
                                     <div class="progress-bar bg-warning" role="progressbar"
                                          aria-valuenow="20"
-                                         aria-valuemin="0" aria-valuemax="100" style="width: 20%">
-                                        <span class="sr-only">20%</span>
+                                         aria-valuemin="0" aria-valuemax="100"
+                                         style="width: {{ rate_count|get_progress_width:2 }}%">
+                                        <span class="sr-only">{{ rate_count|get_progress_width:2 }}%</span>
                                     </div>
                                 </div>
                             </div>
@@ -96,8 +104,9 @@
                                 <div class="progress">
                                     <div class="progress-bar bg-danger" role="progressbar"
                                          aria-valuenow="80"
-                                         aria-valuemin="0" aria-valuemax="100" style="width: 15%">
-                                        <span class="sr-only">15%</span>
+                                         aria-valuemin="0" aria-valuemax="100"
+                                         style="width: {{ rate_count|get_progress_width:1 }}%">
+                                        <span class="sr-only">{{ rate_count|get_progress_width:1 }}%</span>
                                     </div>
                                 </div>
                             </div>

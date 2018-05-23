@@ -36,7 +36,7 @@
     height: 20px;
 }
 
-.progress .progress-bar{
+.progress .progress-bar {
     height: 20px;
     text-align: left;
 }
@@ -49,6 +49,14 @@
     margin-left: 5px;
     overflow: visible;
     clip: auto;
+}
+
+.patent-navbar {
+
+}
+
+.patent-sortby {
+    padding-right: 10px;
 }
 
 

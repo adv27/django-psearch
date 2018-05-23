@@ -1,8 +1,22 @@
+from collections import Counter
+
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
-from django.conf import settings
 
 from .models import *
+
+
+def get_rate_percentage(rates):
+    """
+        Return percentage of each rating point (1->5) of 1 patent
+    """
+    c = Counter(list(map(lambda _r: _r.rating, rates)))
+    rate_count = dict(c)
+    rate_times = len(rates)
+    for k, v in rate_count.items():
+        rate_count[k] = v / rate_times * 100
+    return rate_count
 
 
 def create_user_validation(username, password):

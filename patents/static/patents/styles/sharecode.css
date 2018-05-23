@@ -1,3 +1,11 @@
+.search-dropdown {
+    position: absolute;
+    right: 46px;
+    top: 0;
+    width: 100px;
+    height: 2.5rem !important;
+}
+
 .cs-wapper {
     width: 100%;
     max-width: 100%;

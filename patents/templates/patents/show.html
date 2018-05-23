@@ -12,6 +12,7 @@
     <script type="text/javascript" src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'bower_components/tether/dist/js/tether.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'patents/scripts/rating.js' %}"></script>
 
     <link rel="stylesheet" href="{% static 'patents/styles/base.css' %}">
     <link rel="stylesheet" href="{% static 'patents/styles/sharecode.css' %}">
@@ -63,36 +64,7 @@
                 <p style="white-space: pre-line">{{ patent.content }}</p>
                 <br>
             </div>
-            <h6 class="tt-tags">
-                <div class="float-right">
-                    {% if user_rating %}
-                        <div>
-                            <h1>Your rating: {{ user_rating }}</h1>
-                        </div>
-                    {% else %}
-                        <div>
-                            <h1>No rating yet</h1>
-                        </div>
-                    {% endif %}
-                    {% if request.session.user_id %}
-                        <div id="reviewStars-input">
-                            {% for title in rate_titles reversed %}
-                                <input id="star-{{ forloop.revcounter0 }}"
-                                       type="radio"
-                                       name="reviewStars"
-                                       value="{{ forloop.revcounter }}"
-                                        {% if user_rating == forloop.revcounter %} checked="checked"{% endif %}/>
-                                <label title="{{ title }}" for="star-{{ forloop.revcounter0 }}"></label>
-                            {% endfor %}
-
-                            <input type="hidden" name="pid" value="{{ patent.id }}">
-                        </div>
-                    {% endif %}
-                </div>
-                <div class="float-left">
-                    {% include 'patents/includes/rating_summarize.html' %}
-                </div>
-            </h6>
+            {% include 'patents/includes/rating_summarize.html' %}
         {% endif %}
     </div>
 {% endblock %}
