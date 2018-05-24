@@ -42,3 +42,25 @@ def rate_times(patent):
 @register.filter
 def get_progress_width(dictionary, star_point):
     return dictionary.get(star_point, 0)
+
+
+@register.filter
+def pop(dictionary: dict, v):
+    clone = dictionary.copy()
+    clone.pop(v, None)
+    return clone
+
+
+@register.filter
+def build_query_string(queries_dictionary: dict):
+    """
+        Building query string from a dictionary of queries
+        ex: {
+            'search' : 2,
+            'q': 'Hello world',
+            'sort': 3
+        }
+        => search=2&q=Hello+World&sort=3
+    """
+    from urllib.parse import urlencode
+    return urlencode(queries_dictionary, doseq=True)

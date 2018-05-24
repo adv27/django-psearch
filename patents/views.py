@@ -142,15 +142,13 @@ def search(request):
 
     parsed = urlparse.urlparse(request.build_absolute_uri())
     queries_dict = urlparse.parse_qs(parsed.query, keep_blank_values=True)
-    queries_dict.pop('page', None)
-    query_string = urlparse.urlencode(queries_dict, doseq=True)
 
     context = {
-        'query_string': query_string,
         'search_fields': SEARCH_FIELDS,
         'sort_fields': SORT_BY_FIELDS,
         'patents': patents,
         'pages': pages,
+        'queries_dict': queries_dict,
         'time': time.time() - t0,
         'query': query,
     }

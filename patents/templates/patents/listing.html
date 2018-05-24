@@ -18,7 +18,7 @@
     {#    <link rel="stylesheet" href="{% static 'patents/styles/bootstrap-multiselect.css' %}">#}
     <link rel="stylesheet" href="{% static 'patents/styles/base.css' %}">
     <link rel="stylesheet" href="{% static 'patents/styles/sharecode.css' %}">
-    {#        <link rel="stylesheet" href="{% static 'patents/styles/sharecode/account/account.css' %}">#}
+    {#            <link rel="stylesheet" href="{% static 'patents/styles/sharecode/account/account.css' %}">#}
 
     {#    <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/logo.css' %}">#}
     <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/style.css' %}">
@@ -31,47 +31,46 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container cs-wapper">
-        <h1>Search time {{ time }}</h1>
-        <div class="jumbotron">
-
-            <div class="col-md-12 patent-navbar">
-                {#                <a href="javascript:void(0)" class="">Home</a>#}
-                {#                <a href="javascript:void(0)" class="">Pricing</a>#}
-                {#                <a href="javascript:void(0)" class="">Disabled</a>#}
-                {% spaceless %}
-                    {% for value, text in sort_fields.items %}
-                        <a href="{% if query_string %}
-                        ?{{ query_string }}&ord={{ value }}
-                    {% else %}
-                    javascript:void(0);
-                    {% endif %}" class="patent-sortby">{{ text }}</a>
-                    {% endfor %}
-                {% endspaceless %}
+    {% spaceless %}
+        <div class="container cs-wapper">
+            <h1>Search time {{ time }}</h1>
+            <div class="jumbotron">
+                <div class="col-md-12 patent-navbar">
+                    {#                <a href="javascript:void(0)" class="">Home</a>#}
+                    {#                <a href="javascript:void(0)" class="">Pricing</a>#}
+                    {#                <a href="javascript:void(0)" class="">Disabled</a>#}
+                    {% with queries_dict|pop:'page'|pop:'sort'|build_query_string as query_string_without_page_sort %}
+                        {% for value, text in sort_fields.items %}
+                            <a href="?{{ query_string_without_page_sort }}&sort={{ value }}"
+                               class="patent-sortby">
+                                {{ text }}
+                            </a>
+                        {% endfor %}
+                    {% endwith %}
+                </div>
             </div>
-        </div>
 
-        {% comment %}
-            Display list patents
-        {% endcomment %}
-        <div class="col-md-12" style="padding:10px 0 0 0;">
-            <div class="col-ele" style="min-height:calc(100vh - 210px);">
-                {% if patents %}
-                    {% for patent in patents %}
-                        <div class="jumbotron">
-                            <div class="table table-filter">
-                                <div class="media">
-                                    <div class="media-body">
-                                        <a href="{% url 'patents:show' patent.id %}?ref={{ query }}">
-                                            <h4 class="title">
-                                                {{ patent.title }}
-                                            </h4>
-                                        </a>
+            {% comment %}
+                Display list patents
+            {% endcomment %}
+            <div class="col-md-12" style="padding:10px 0 0 0;">
+                <div class="col-ele" style="min-height:calc(100vh - 210px);">
+                    {% if patents %}
+                        {% for patent in patents %}
+                            <div class="jumbotron">
+                                <div class="table table-filter">
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <a href="{% url 'patents:show' patent.id %}?ref={{ query }}">
+                                                <h4 class="title">
+                                                    {{ patent.title }}
+                                                </h4>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <h6 class="tt-tags">
-                                <div class="float-left">
+                                <h6 class="tt-tags">
+                                    <div class="float-left">
                                     <span title="{{ patent.rate }}">
                                         <div class="star-ratings-sprite">
                                             <span style="width:{{ patent.rate | x20 }}%"
@@ -79,76 +78,88 @@
                                             </span>
                                         </div>
                                     </span>
-                                </div>
-                                {% comment %}
-                                    Download section
-                                {% endcomment %}
-                                <div class="float-right">
+                                    </div>
+                                    {% comment %}
+                                        Download section
+                                    {% endcomment %}
+                                    <div class="float-right">
                                     <span class="media-download" data-placement="top">
                                          <a class="fa fa-download" aria-hidden="true" style="margin-right:5px;"
                                             href="{% url 'patents:download' patent.id %}" download="">Tải về</a>
                                     </span>
-                                </div>
-                            </h6>
-                            <p class="media-content">
-                                {{ patent.abstract }}
-                            </p>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </div>
-        {% comment %}
-            Pagination section
-        {% endcomment %}
-        <div class="col-ele">
-            <div class="cs-pagination">
-                <ul class="pagination pagination-circle pg-blue mb-0">
-                    {% if patents.has_other_pages %}
-                        {% if patents.number !=  1 %}
-                            <li class="page-item">
-                                <a href="?{{ query_string }}" class="page-link waves-effect waves-effect">
-                                    First
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% if patents.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link waves-effect waves-effect"
-                                   href="?{{ query_string }}&page={{ patents.previous_page_number }}">
-                                    &laquo;
-                                </a>
-                            </li>
-                        {% endif %}
-
-                        {% for i in pages %}
-                            {% if patents.number == i %}
-                                <li class="page-item active">
-                                    <span class="page-link waves-effect waves-effect">{{ i }}</span>
-                                </li>
-                            {% else %}
-                                <li class="page-item">
-                                    <a href="?{{ query_string }}&page={{ i }}"
-                                       class="page-link waves-effect waves-effect">{{ i }}</a>
-                                </li>
-                            {% endif %}
+                                    </div>
+                                </h6>
+                                <p class="media-content">
+                                    {{ patent.abstract }}
+                                </p>
+                            </div>
                         {% endfor %}
-
-                        {% if patents.has_next %}
-                            <li class="page-item"><a href="?{{ query_string }}&page={{ patents.next_page_number }}"
-                                                     class="page-link waves-effect waves-effect">&raquo;</a></li>
-                        {% endif %}
-                        {% if patents.number !=  patents.paginator.num_pages %}
-                            <li class="page-item">
-                                <a href="?{{ query_string }}&page={{ patents.paginator.num_pages }}"
-                                   class="page-link waves-effect waves-effect">
-                                    Last
-                                </a>
-                            </li>
-                        {% endif %}
                     {% endif %}
-                </ul>
+                </div>
+            </div>
+            {% comment %}
+                Pagination section
+            {% endcomment %}
+            <div class="col-ele">
+                <div class="cs-pagination">
+                    <ul class="pagination pagination-circle pg-blue mb-0">
+                        {% with queries_dict|pop:'page'|build_query_string as query_string_without_page %}
+                            {% if patents.has_other_pages %}
+                                {% if patents.number !=  1 %}
+                                    <li class="page-item">
+                                        <a href="?{{ query_string_without_page }}"
+                                           class="page-link waves-effect waves-effect">
+                                            First
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% if patents.has_previous %}
+                                    <li class="page-item">
+                                        <a href="?{{ query_string_without_page }}
+                                        &page={{ patents.previous_page_number }}"
+                                           class="page-link waves-effect waves-effect">
+                                            &laquo;
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                {% for i in pages %}
+                                    {% if patents.number == i %}
+                                        <li class="page-item active">
+                                            <span class="page-link waves-effect waves-effect">{{ i }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a href="?{{ query_string_without_page }}&page={{ i }}"
+                                               class="page-link waves-effect waves-effect">
+                                                {{ i }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if patents.has_next %}
+                                    <li class="page-item">
+                                        <a href="?{{ query_string_without_page }}
+                                    &page={{ patents.next_page_number }}"
+                                           class="page-link waves-effect waves-effect">&raquo;
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% if patents.number !=  patents.paginator.num_pages %}
+                                    <li class="page-item">
+                                        <a href="?{{ query_string_without_page }}
+                                    &page={{ patents.paginator.num_pages }}"
+                                           class="page-link waves-effect waves-effect">
+                                            Last
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                        {% endwith %}
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
+    {% endspaceless %}
 {% endblock %}

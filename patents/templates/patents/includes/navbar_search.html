@@ -1,29 +1,31 @@
 {% load static from staticfiles %}
-
-<div class="navbar navbar-static-top" role="navigation" style="background:#f7f7f7">
-    <div class="navbar-header">
-        <div class="cs-logo">
-            <a class="navbar-brand navbar-menu-left float-left" rel="home" href="/">
-                <img src="{% static 'patents/images/patent.PNG' %}" alt="Patent" style="width:100px">
-            </a>
-        </div>
-        <div class="cs-search">
-            <form class="navbar-form waves-effect waves-light" role="search" action="/search" method="get">
-                <div class="input-group" style="">
-                    <div class="input-group">
-                        <input id="search-term" class="input-alternate" name="q" autocomplete="off">
-                        <button type="submit" class="input-group-addon"><i class="fa fa-search"></i></button>
-                        {% if search_fields %}
-                            <select class="search-dropdown" name="field">
-                                {% for k, v in search_fields.items %}
-                                    <option value="{{ k }}">{{ v }}</option>
-                                {% endfor %}
-                            </select>
-                        {% endif %}
+{% spaceless %}
+    <div class="navbar navbar-static-top" role="navigation" style="background:#f7f7f7">
+        <div class="navbar-header">
+            <div class="cs-logo">
+                <a class="navbar-brand navbar-menu-left float-left" rel="home" href="/">
+                    <img src="{% static 'patents/images/patent.PNG' %}" alt="Patent" style="width:100px">
+                </a>
+            </div>
+            <div class="cs-search">
+                <form class="navbar-form waves-effect waves-light" role="search" action="/search" method="get">
+                    <div class="input-group" style="">
+                        <div class="input-group">
+                            <input id="search-term" class="input-alternate" name="q" autocomplete="off"
+                                    {% if query %} value="{{ query }}"{% endif %}>
+                            <button type="submit" class="input-group-addon"><i class="fa fa-search"></i></button>
+                            {% if search_fields %}
+                                <select class="search-dropdown" name="field">
+                                    {% for k, v in search_fields.items %}
+                                        <option value="{{ k }}">{{ v }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
+            {% include 'patents/includes/navbar_login_logout.html' %}
         </div>
-        {% include 'patents/includes/navbar_login_logout.html' %}
     </div>
-</div>
+{% endspaceless %}
