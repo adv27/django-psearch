@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.http import (Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse)
 from django.shortcuts import (redirect, render, reverse)
 from django.views.generic.edit import FormView
+from django.views.decorators.csrf import csrf_protect
 
 from .forms import FileFieldForm
 from .utils import *
@@ -236,13 +237,22 @@ def detail(request, pat_id):
     return render(request, template_name='patents/show.html', context=context)
 
 
+@csrf_protect
 def login(request):
     if request.method == 'POST':
         u = User.objects(user_name__iexact=request.POST['username']).first()
-        print(u.password)
-        if u.password == request.POST['password']:
-            request.session['user_id'] = str(u.id)
-            return HttpResponseRedirect(reverse('patents:index'))
+        if u is not None:
+            if u.password == request.POST['password']:
+                request.session['user_id'] = str(u.id)
+                # return HttpResponseRedirect(reverse('patents:index'))
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Login successful',
+                })
+        return JsonResponse({
+            'success': False,
+            'message': 'Wrong credential',
+        })
     return HttpResponseBadRequest()
 
 
@@ -254,15 +264,16 @@ def logout(request):
     return HttpResponseRedirect(reverse('patents:index'))
 
 
+@csrf_protect
 def create_account(request):
     if request.method == 'POST':
-        pwd = request.POST.get('password')
-        name = request.POST.get('username')
+        pwd = request.POST.get('psw')
+        name = request.POST.get('u')
         if create_user_validation(username=name, password=pwd):
             create_user(username=name, password=pwd)
             return JsonResponse({
                 'success': True,
-                'error': True,
+                'error': False,
                 'message': 'Account create successful'
             })
         else:

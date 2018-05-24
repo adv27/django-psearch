@@ -1,5 +1,7 @@
+'use_strict';
+
 $(document).ready(function () {
-    // openLoginModal();
+    // openlogin-form();
 });
 
 
@@ -17,61 +19,65 @@ function showRegisterForm() {
         $('.login-footer').fadeOut('fast', function () {
             $('.register-footer').fadeIn('fast');
         });
-        $('.modal-title').html('Register with');
+        $('.modal-title').html('Đăng kí');
     });
     $('.error').removeClass('alert alert-danger').html('');
 
 }
 
 function showLoginForm() {
-    $('#loginModal .registerBox').fadeOut('fast', function () {
+    $('#login-form .registerBox').fadeOut('fast', function () {
         $('.loginBox').fadeIn('fast');
         $('.register-footer').fadeOut('fast', function () {
             $('.login-footer').fadeIn('fast');
         });
 
-        $('.modal-title').html('Login with');
+        $('.modal-title').html('Đăng nhập');
     });
     $('.error').removeClass('alert alert-danger').html('');
 }
 
-function openLoginModal() {
-    showLoginForm();
-    setTimeout(function () {
-        $('#loginModal').modal('show');
-    }, 230);
-
-}
-
-function openRegisterModal() {
-    showRegisterForm();
-    setTimeout(function () {
-        $('#loginModal').modal('show');
-    }, 230);
-
-}
-
 function loginAjax() {
-    /*   Remove this comments when moving to server
-    $.post( "/login", function( data ) {
-            if(data == 1){
-                window.location.replace("/home");
-            } else {
-                 shakeModal();
-            }
-        });
-    */
+    var $form = $("div[class='form loginBox']:visible").find("form").first();
+    var url = $form.attr("action");
 
-    /*   Simulate error message from the server   */
-    shakeModal();
+    $.post({
+        url: url,
+        data: $form.serialize(),
+        success: function (data) {
+            if (data.success) {
+                window.location.replace("/");
+            } else {
+                shakeModal(data.message);
+            }
+        }
+    });
 }
 
-function shakeModal() {
-    $('#loginModal .modal-dialog').addClass('shake');
-    $('.error').addClass('alert alert-danger').html("Invalid email/password combination");
+function registerAjax() {
+    var $form = $("div[class='content registerBox']:visible").find("form").first();
+    var url = $form.attr("action");
+
+    $.post({
+        url: url,
+        data: $form.serialize(),
+        success: function (data) {
+            // if (data.success) {
+            //     window.location.replace("/");
+            // } else {
+            //     shakeModal(data.message);
+            // }
+            shakeModal(data.message, data.success)
+        }
+    });
+}
+
+function shakeModal(mess, isSuccess = false) {
+    $('#login-form').find('.modal-dialog').addClass('shake');
+    $('.error').removeClass().addClass(`alert alert-${isSuccess ? 'success' : 'danger'}`).html(mess);
     $('input[type="password"]').val('');
     setTimeout(function () {
-        $('#loginModal .modal-dialog').removeClass('shake');
+        $('#login-form .modal-dialog').removeClass('shake');
     }, 1000);
 }
 

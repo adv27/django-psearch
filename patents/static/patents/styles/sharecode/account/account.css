@@ -461,7 +461,7 @@ input.textbox2 {
     color: #FFFFFF;
     display: block;
     margin: 0 auto;
-    padding: 15px 50px;
+    padding: 25px 50px;
     text-transform: uppercase;
     width: 100%;
 }
@@ -495,7 +495,7 @@ input.textbox2 {
     font-size: 16px;
     height: 46px;
     margin-bottom: 5px;
-    padding: 13px 12px;
+    /*padding: 13px 12px;*/
     width: 100%;
 }
 

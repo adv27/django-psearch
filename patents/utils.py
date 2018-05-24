@@ -20,7 +20,7 @@ def get_rate_percentage(rates):
 
 
 def create_user_validation(username, password):
-    return True
+    return len(User.objects.filter(user_name=username)) == 0
 
 
 def create_user(username, password):
