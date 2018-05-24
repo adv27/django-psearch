@@ -1,9 +1,11 @@
 {% load app_filters %}
+{% load static from staticfiles %}
+<link rel="stylesheet" href="{% static 'patents/styles/sharecode/account/account.css' %}">
+<script type="text/javascript" src="{% static 'patents/scripts/login.js' %}"></script>
 <div class="navbar-brand navbar-menu-right float-right">
     <div class="tt-m float-right">
         <div class="tt-ab float-left">
             {% if request.session.user_id %}
-                <h1>You are {{ request.session.user_id|get_username }}</h1>
                 <form action="{% url 'patents:account_logout' %}" method="post" class="form-inline my-2 my-lg-0">
                     {% csrf_token %}
                     <button class="btn btn-sm btn-outline-danger my-2 my-sm-0" type="submit">Logout</button>
@@ -14,7 +16,7 @@
                     <span class="btn-signin-text">Đăng Nhập</span>
                     <i class="fa fa-sign-in mr-1 btn-signin-icon" style="font-size:25px;"></i>
                 </button>
-                <div class="modal fade cs-login-form" id="login-form" role="dialog" style="display: none;"
+                <div class="modal fade login" id="login-form" role="dialog" style="display: none;"
                      aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-header" style="background: #fff">
@@ -24,26 +26,69 @@
                         <!-- Modal content-->
                         <div class="modal-content">
                             <div class="modal-body">
-                                <div class="row">
-                                    <form class="contact_form col-sm-12 waves-effect waves-light"
-                                          action="{% url 'patents:account_login' %}" method="post"
-                                          name="contact_form">
-                                        {% csrf_token %}
-                                        <ul>
-                                            <li>
-                                                <input type="text" class="textbox1 form-control" name="username"
-                                                       required="" placeholder="Tài khoản">
-                                                <p class="icon"><i class="fa fa-user-o" aria-hidden="true"></i></p>
-                                            </li>
-                                            <li>
-                                                <input type="password" name="password" class="textbox2"
-                                                       placeholder="Mật khẩu">
-                                                <p class="icon"><i class="fa fa-lock" aria-hidden="true"></i></p>
-                                            </li>
-                                        </ul>
-                                        <input type="submit" name="Sign In" value="ĐĂNG NHẬP">
-                                        <div class="clear"></div>
-                                    </form>
+                                <div class="box">
+                                    <div class="content">
+                                        <div class="error"></div>
+                                        <div class="form loginBox">
+                                            <form method="post" action="/login" accept-charset="UTF-8">
+                                                <input id="email" class="form-control" type="text" placeholder="Email"
+                                                       name="email">
+                                                <input id="password" class="form-control" type="password"
+                                                       placeholder="Password" name="password">
+                                                <input class="btn btn-default btn-login" type="button" value="Login"
+                                                       onclick="loginAjax()">
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="box">
+                                    <div class="content registerBox" style="display:none;">
+                                        <div class="form">
+                                            <form method="post" html="{:multipart=>true}" data-remote="true"
+                                                  action="/register" accept-charset="UTF-8">
+                                                <input id="email" class="form-control" type="text" placeholder="Email"
+                                                       name="email">
+                                                <input id="password" class="form-control" type="password"
+                                                       placeholder="Password" name="password">
+                                                <input id="password_confirmation" class="form-control" type="password"
+                                                       placeholder="Repeat Password" name="password_confirmation">
+                                                <input class="btn btn-default btn-register" type="submit"
+                                                       value="Create account" name="commit">
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {#                                <div class="row">#}
+                                {#                                    <form class="contact_form col-sm-12 waves-effect waves-light"#}
+                                {#                                          action="{% url 'patents:account_login' %}" method="post"#}
+                                {#                                          name="contact_form">#}
+                                {#                                        {% csrf_token %}#}
+                                {#                                        <ul>#}
+                                {#                                            <li>#}
+                                {#                                                <input type="text" class="textbox1 form-control" name="username"#}
+                                {#                                                       required="" placeholder="Tài khoản">#}
+                                {#                                                <p class="icon"><i class="fa fa-user-o" aria-hidden="true"></i></p>#}
+                                {#                                            </li>#}
+                                {#                                            <li>#}
+                                {#                                                <input type="password" name="password" class="textbox2"#}
+                                {#                                                       placeholder="Mật khẩu">#}
+                                {#                                                <p class="icon"><i class="fa fa-lock" aria-hidden="true"></i></p>#}
+                                {#                                            </li>#}
+                                {#                                        </ul>#}
+                                {#                                        <input type="submit" name="Sign In" value="ĐĂNG NHẬP">#}
+                                {#                                        <div class="clear"></div>#}
+                                {#                                    </form>#}
+                                {#                                </div>#}
+                            </div>
+                            <div class="modal-footer">
+                                <div class="forgot login-footer">
+                            <span>Looking to
+                                 <a href="javascript: showRegisterForm();">create an account</a>
+                            ?</span>
+                                </div>
+                                <div class="forgot register-footer" style="display:none">
+                                    <span>Already have an account?</span>
+                                    <a href="javascript: showLoginForm();">Login</a>
                                 </div>
                             </div>
                         </div>
@@ -53,3 +98,18 @@
         </div>
     </div>
 </div>
+{% if request.session.user_id %}
+    <div class="navbar-brand float-right">
+        <form class="form-inline">
+            <div class="md-form input-group my-0">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon11">@</span>
+                </div>
+                <input type="text" class="form-control" disabled placeholder="Username" aria-label="Username"
+                       aria-describedby="basic-addon11"
+                       value="{{ request.session.user_id|get_username }}">
+                <a></a>
+            </div>
+        </form>
+    </div>
+{% endif %}

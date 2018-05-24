@@ -20,7 +20,6 @@
                         {% if request.session.user_id %}
                             <div id="reviewStars-input">
                                 <div class="reviewStars-group">
-
                                     {% for title in rate_titles reversed %}
                                         <input id="star-{{ forloop.revcounter0 }}"
                                                type="radio"

@@ -72,7 +72,6 @@ def search(request):
         if query is not '':
             search_field = request.GET.get('field')
             if search_field is None or search_field == '' or search_field == '0':
-                # patent_list = Patent.objects.search_text(query)
                 patent_list = Patent.objects.search_text(query)
             elif search_field in SEARCH_FIELD_MAPPING:
                 sss = {

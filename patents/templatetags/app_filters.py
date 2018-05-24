@@ -64,3 +64,8 @@ def build_query_string(queries_dictionary: dict):
     """
     from urllib.parse import urlencode
     return urlencode(queries_dictionary, doseq=True)
+
+
+@register.filter
+def is_empty_query(query):
+    return query == ['']

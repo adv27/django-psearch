@@ -18,7 +18,6 @@
     {#    <link rel="stylesheet" href="{% static 'patents/styles/bootstrap-multiselect.css' %}">#}
     <link rel="stylesheet" href="{% static 'patents/styles/base.css' %}">
     <link rel="stylesheet" href="{% static 'patents/styles/sharecode.css' %}">
-    {#            <link rel="stylesheet" href="{% static 'patents/styles/sharecode/account/account.css' %}">#}
 
     {#    <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/logo.css' %}">#}
     <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/style.css' %}">
@@ -39,10 +38,16 @@
                     {#                <a href="javascript:void(0)" class="">Home</a>#}
                     {#                <a href="javascript:void(0)" class="">Pricing</a>#}
                     {#                <a href="javascript:void(0)" class="">Disabled</a>#}
-                    {% with queries_dict|pop:'page'|pop:'sort'|build_query_string as query_string_without_page_sort %}
+                    {% with queries_dict|pop:'page'|pop:'ord'|build_query_string as query_string_without_page_sort %}
                         {% for value, text in sort_fields.items %}
-                            <a href="?{{ query_string_without_page_sort }}&sort={{ value }}"
-                               class="patent-sortby">
+                            <a href="?{{ query_string_without_page_sort }}&ord={{ value }}"
+                               class="patent-sortby {% if  value == 0 %}
+                               {% with '0' as search_all_field %}
+                                      {% if queries_dict|get_item:'q'|is_empty_query or queries_dict|get_item:'field' != search_all_field.split %}
+                                    patent-sortby-disable
+                                {% endif %}
+                               {% endwith %}
+                               {% endif %}">
                                 {{ text }}
                             </a>
                         {% endfor %}

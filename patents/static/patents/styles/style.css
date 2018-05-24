@@ -59,6 +59,11 @@
     padding-right: 10px;
 }
 
+.patent-sortby-disable {
+    pointer-events: none;
+    color: grey;
+}
+
 
 
 
