@@ -34,9 +34,11 @@
                                                   accept-charset="UTF-8">
                                                 {% csrf_token %}
                                                 <input id="username" name="username" class="form-control" type="text"
-                                                       placeholder="Tài khoản">
+                                                       placeholder="Tài khoản"
+                                                       required="required">
                                                 <input id="password" name="password" class="form-control"
-                                                       type="password" placeholder="Mật khẩu">
+                                                       type="password" placeholder="Mật khẩu"
+                                                       required="required">
                                                 <input class="btn btn-default btn-login" type="button"
                                                        value="Đăng nhập"
                                                        onclick="loginAjax()">
@@ -51,12 +53,15 @@
                                                   action="{% url 'patents:account_create' %}" accept-charset="UTF-8">
                                                 {% csrf_token %}
                                                 <input id="u" name="u" class="form-control" type="text"
-                                                       placeholder="Tên đăng nhập">
+                                                       placeholder="Tên đăng nhập"
+                                                       required="required">
                                                 <input id="psw" name="psw" class="form-control"
-                                                       type="password" placeholder="Mật khẩu">
+                                                       type="password" placeholder="Mật khẩu"
+                                                       required="required">
                                                 <input id="psw_confirmation" name="psw_confirmation"
                                                        class="form-control" type="password"
-                                                       placeholder="Nhập lại mật khẩu">
+                                                       placeholder="Nhập lại mật khẩu"
+                                                       required="required">
                                                 <input class="btn btn-default btn-register" type="button"
                                                        value="Tạo tài khoản" name="commit"
                                                        onclick="registerAjax()">
@@ -83,7 +88,63 @@
         </div>
     </div>
 </div>
+{% comment %}
+If user logged in, display username
+{%  endcomment %}
 {% if request.session.user_id %}
+    {% comment %}
+    Display change password button
+    {% endcomment %}
+    <div class="navbar-brand float-right">
+        <button type="button" data-toggle="modal" data-target="#changepassword-form"
+                class="btn btn-sm btn-blue cs-btn-singin waves-effect waves-light" style="margin-top:0px">
+            <span class="btn-signin-text">Đổi mật khẩu</span>
+            <i class="fa fa-sign-in mr-1 btn-signin-icon" style="font-size:25px;"></i>
+        </button>
+    </div>
+    <div class="modal fade login" id="changepassword-form" role="dialog" style="display: none;"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-header" style="background: #fff">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Đổi mật khẩu</h4>
+            </div>
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="box">
+                        <div class="content">
+                            <div class="error"></div>
+                            <div class="form changePswBox">
+                                <form method="post" action="{% url 'patents:account_change_password' %}"
+                                      accept-charset="UTF-8">
+                                    {% csrf_token %}
+                                    <input id="current_psw" name="current_psw" class="form-control" type="password"
+                                           placeholder="Mật khẩu hiện tại"
+                                           required="required">
+                                    <input id="new_psw" name="new_psw" class="form-control"
+                                           type="password" placeholder="Mật khẩu mới"
+                                           required="required">
+                                    <input id="new_psw_confirmation" name="new_psw_confirmation"
+                                           class="form-control" type="password"
+                                           placeholder="Nhập lại mật khẩu mới"
+                                           required="required">
+                                    <input class="btn btn-default btn-login" type="button"
+                                           value="Đổi mật khẩu"
+                                           onclick="changePasswordAjax()">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+    {% comment %}
+    Display username
+    {% endcomment %}
     <div class="navbar-brand float-right">
         <form class="form-inline">
             <div class="md-form input-group my-0">
@@ -92,6 +153,7 @@
                 </div>
                 <input type="text" class="form-control" disabled placeholder="Username" aria-label="Username"
                        aria-describedby="basic-addon11"
+                       style="width: 100px;"
                        value="{{ request.session.user_id|get_username }}">
                 <a></a>
             </div>

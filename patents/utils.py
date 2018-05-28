@@ -1,8 +1,10 @@
 from collections import Counter
+import os
 
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
+from django.core.files import File
 
 from .models import *
 
@@ -31,6 +33,13 @@ def create_user(username, password):
     user.save()
 
 
+def handle_uploaded_path(path):
+    with open(path, 'rb') as f:
+        django_f = File(f)
+        f_name = os.path.basename(django_f.name)
+        handle_uploaded_file(f_name, django_f.read())
+
+
 def handle_uploaded_file(filename, filestream):
     import xmltodict
     import json
@@ -47,28 +56,6 @@ def handle_uploaded_file(filename, filestream):
         fs.save(name=filename, content=cf)
     except Exception as e:
         print('{} - Exception: {} - {}'.format(__name__, filename, e))
-
-
-def a_handle_uploaded_file(file):
-    import xmltodict
-    import json
-
-    _dict = xmltodict.parse(file.read())
-    _json = json.dumps(_dict)
-    doc = json.loads(_json)
-
-    filename = file.name
-    try:
-        save_mongo(filename=filename, doc=doc)
-    except Exception as e:
-        print('{} - {}'.format(filename, e))
-        return
-    # if save_mongo is success
-    # with open(r'C:\Users\vdanh\Desktop\tmp\{}'.format(filename), 'wb') as f:
-    #     f.write(filestream)
-    fs = FileSystemStorage()
-    fs.save(name=filename, content=file)
-    print('Saved: {}'.format(filename))
 
 
 def handle_uploaded_file_unpack(args):

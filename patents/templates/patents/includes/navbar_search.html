@@ -1,4 +1,5 @@
 {% load static from staticfiles %}
+{% load app_filters %}
 {% spaceless %}
     <div class="navbar navbar-static-top" role="navigation" style="background:#f7f7f7">
         <div class="navbar-header">
@@ -17,7 +18,9 @@
                             {% if search_fields %}
                                 <select class="search-dropdown" name="field">
                                     {% for k, v in search_fields.items %}
-                                        <option value="{{ k }}">{{ v }}</option>
+                                        <option value="{{ k }}" {% if queries_dict|get_item:'field'|get:0 == k %}
+                                                selected="selected"
+                                        {% endif %}>{{ v }}</option>
                                     {% endfor %}
                                 </select>
                             {% endif %}

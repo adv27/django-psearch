@@ -37,6 +37,31 @@ function showLoginForm() {
     $('.error').removeClass('alert alert-danger').html('');
 }
 
+function changePasswordAjax() {
+    var $form = $("div[class='form changePswBox']:visible").find("form").first();
+    var url = $form.attr("action");
+
+    var psw = $form.find("#new_psw").first().val();
+    var psw_confirmation = $form.find("#new_psw_confirmation").first().val();
+
+    if (psw != psw_confirmation) {
+        shakeModal("Mật khẩu không khớp");
+        return
+    }
+    $.post({
+        url: url,
+        data: $form.serialize(),
+        success: function (data) {
+            if (data.success) {
+                shakeModal(data.message, data.success);
+                setTimeout(window.location.replace("/"), 1000);
+            } else {
+                shakeModal(data.message);
+            }
+        }
+    });
+}
+
 function loginAjax() {
     var $form = $("div[class='form loginBox']:visible").find("form").first();
     var url = $form.attr("action");
@@ -58,6 +83,13 @@ function registerAjax() {
     var $form = $("div[class='content registerBox']:visible").find("form").first();
     var url = $form.attr("action");
 
+    var psw = $form.find("#psw").first().val();
+    var psw_confirmation = $form.find("#psw_confirmation").first().val();
+
+    if (psw != psw_confirmation) {
+        shakeModal("Mật khẩu không khớp");
+        return
+    }
     $.post({
         url: url,
         data: $form.serialize(),

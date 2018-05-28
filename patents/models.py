@@ -24,7 +24,7 @@ class Patent(Document):
                     '$content',
                 ], 'default_language': 'english',
             }
-        ]
+        ],
     }
 
 

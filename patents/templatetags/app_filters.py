@@ -14,8 +14,28 @@ def to_int(value):
 
 
 @register.filter
+def have_text_score(document):
+    # try:
+    #     return document._text_score
+    # except Exception:
+    #     return None
+    try:
+        return document.get_text_score()
+    except Exception:
+        return False
+
+
+@register.filter
 def get_item(dictionary, key):
     return dictionary.get(key, False)
+
+
+@register.filter
+def get(_list, index):
+    try:
+        return _list[index]
+    except Exception:
+        return None
 
 
 @register.filter
@@ -56,9 +76,9 @@ def build_query_string(queries_dictionary: dict):
     """
         Building query string from a dictionary of queries
         ex: {
-            'search' : 2,
-            'q': 'Hello world',
-            'sort': 3
+            'search' : [2],
+            'q': ['Hello world'],
+            'sort': [3]
         }
         => search=2&q=Hello+World&sort=3
     """

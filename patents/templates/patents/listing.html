@@ -3,15 +3,6 @@
 {% block head %}
     {#    <link rel="stylesheet" type="text/css" href="https://netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css">#}
     {% load static from staticfiles %}
-    <link rel="stylesheet" type="text/css"
-          href="{% static 'bower_components/components-font-awesome/css/font-awesome.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'bower_components/bootstrap/dist/css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.4.3/css/mdb.min.css">
-
-    <script type="text/javascript" src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'bower_components/tether/dist/js/tether.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
     {#    <script type="text/javascript" src="{% static 'patents/scripts/bootstrap-multiselect.js' %}"></script>#}
     {#        <link rel="stylesheet" href="{% static 'patents/fonts/font-awesome/css/font-awesome.min.css' %}">#}
     {#    <link rel="stylesheet" href="{% static 'patents/styles/jquery.auto-complete.css' %}">#}
@@ -75,7 +66,18 @@
                                     </div>
                                 </div>
                                 <h6 class="tt-tags">
-                                    <div class="float-left">
+                                    {% comment %}
+                                    Display views
+                                    {% endcomment %}
+                                    <div class="float-left" style="padding-right: 20px;">
+                                    <span class="media-meta" data-toggle="tooltip" data-placement="top">
+                                        <i class="fa fa-eye" aria-hidden="true">Views: {{ patent.view }}</i>
+                                        </span>
+                                    </div>
+                                    {% comment %}
+                                    Display rate
+                                    {% endcomment %}
+                                    <div class="float-left" style="padding-right: 20px;">
                                     <span title="{{ patent.rate }}">
                                         <div class="star-ratings-sprite">
                                             <span style="width:{{ patent.rate | x20 }}%"
@@ -85,7 +87,18 @@
                                     </span>
                                     </div>
                                     {% comment %}
-                                        Download section
+                                    Display text point if have
+                                    {% endcomment %}
+                                    {% if patent|have_text_score %}
+                                        <div class="float-left">
+                                            <span class="media-meta" data-toggle="tooltip" data-placement="top">
+                                                <i class="fa fa-bar-chart"
+                                                   aria-hidden="true">Text score: {{ patent.get_text_score }}</i>
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                    {% comment %}
+                                    Download section
                                     {% endcomment %}
                                     <div class="float-right">
                                     <span class="media-download" data-placement="top">
@@ -120,8 +133,7 @@
                                 {% endif %}
                                 {% if patents.has_previous %}
                                     <li class="page-item">
-                                        <a href="?{{ query_string_without_page }}
-                                        &page={{ patents.previous_page_number }}"
+                                        <a href="?{{ query_string_without_page }}&page={{ patents.previous_page_number }}"
                                            class="page-link waves-effect waves-effect">
                                             &laquo;
                                         </a>
@@ -145,16 +157,14 @@
 
                                 {% if patents.has_next %}
                                     <li class="page-item">
-                                        <a href="?{{ query_string_without_page }}
-                                    &page={{ patents.next_page_number }}"
+                                        <a href="?{{ query_string_without_page }}&page={{ patents.next_page_number }}"
                                            class="page-link waves-effect waves-effect">&raquo;
                                         </a>
                                     </li>
                                 {% endif %}
                                 {% if patents.number !=  patents.paginator.num_pages %}
                                     <li class="page-item">
-                                        <a href="?{{ query_string_without_page }}
-                                    &page={{ patents.paginator.num_pages }}"
+                                        <a href="?{{ query_string_without_page }}&page={{ patents.paginator.num_pages }}"
                                            class="page-link waves-effect waves-effect">
                                             Last
                                         </a>

@@ -2,20 +2,21 @@ import os
 import time
 import urllib.parse as urlparse
 
+from django import forms
 from django.core.paginator import Paginator
 from django.http import (Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse)
 from django.shortcuts import (redirect, render, reverse)
-from django.views.generic.edit import FormView
 from django.views.decorators.csrf import csrf_protect
+from django.views.generic.edit import FormView
 
 from .forms import FileFieldForm
 from .utils import *
 
 SEARCH_FIELDS = {
-    0: 'All',
-    1: 'Title',
-    2: 'Abstract',
-    3: 'Content',
+    '0': 'All',
+    '1': 'Title',
+    '2': 'Abstract',
+    '3': 'Content',
 }
 
 SEARCH_FIELD_MAPPING = {
@@ -87,8 +88,11 @@ def search(request):
         if order_by is not None and order_by != '':
             if order_by in SORT_BY_MAPPING:
                 patent_list = patent_list.order_by(SORT_BY_MAPPING.get(order_by))
-        # patent_list.order_by('-vote')
+        # calculate time taken to query and sort
+        time_query = time.time() - t0
 
+        # if user already logged in, change the query time of user
+        # and update Search Document
         if request.session.get('user_id', False):
             uid = request.session.get('user_id')
             'modify user document'
@@ -149,7 +153,7 @@ def search(request):
         'patents': patents,
         'pages': pages,
         'queries_dict': queries_dict,
-        'time': time.time() - t0,
+        'time': time_query,
         'query': query,
     }
 
@@ -267,19 +271,23 @@ def logout(request):
 @csrf_protect
 def create_account(request):
     if request.method == 'POST':
-        pwd = request.POST.get('psw')
+        psw = request.POST.get('psw')
+        psw_confirmation = request.POST.get('psw_confirmation')
         name = request.POST.get('u')
-        if create_user_validation(username=name, password=pwd):
-            create_user(username=name, password=pwd)
+        if psw != psw_confirmation:
+            return JsonResponse({
+                'success': False,
+                'message': 'Password confirmation not matchl'
+            })
+        if create_user_validation(username=name, password=psw):
+            create_user(username=name, password=psw)
             return JsonResponse({
                 'success': True,
-                'error': False,
                 'message': 'Account create successful'
             })
         else:
             return JsonResponse({
                 'success': False,
-                'error': True,
                 'message': 'Validation failed'
             })
     return HttpResponseBadRequest()
@@ -293,20 +301,39 @@ def change_password_account(request):
         uid = request.session.get('user_id', False)
         if uid:
             u = User.objects.get(id=uid)
-            new_password = request.POST.get('new_password')
-            if new_password is None or new_password == '':
+            if u:
+                current_password = request.POST.get('current_psw')
+                if current_password != u.password:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Current password not match',
+                    })
+
+                new_password = request.POST.get('new_psw')
+                new_password_confirmation = request.POST.get('new_psw_confirmation')
+                if new_password is None or new_password == '':
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'New Password is invalid',
+                    })
+                if new_password != new_password_confirmation:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Password confirmation not match',
+                    })
+
+                u.password = new_password
+                u.save()
+                # return redirect(reverse('patents:index'))
+                logout(request)
                 return JsonResponse({
-                    'error': True,
-                    'message': 'New Password is invalid',
+                    'success': True,
+                    'message': 'Password changed',
                 })
-            u.password = new_password
-            u.save()
-            return redirect(reverse('patents:index'))
-        else:
-            return JsonResponse({
-                'error': True,
-                'message': 'Permission denied',
-            })
+        return JsonResponse({
+            'success': False,
+            'message': 'Permission denied',
+        })
     return HttpResponseBadRequest()
 
 
@@ -375,8 +402,13 @@ def rate(request):
         return HttpResponse('patent and rating false')
 
 
+class UploadFileForm(forms.Form):
+    file_field = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    directory_field = forms.CharField(required=False, help_text='Directory contains xml files')
+
+
 class FileFieldView(FormView):
-    form_class = FileFieldForm
+    form_class = UploadFileForm
     template_name = 'patents/upload.html'
     # success_url = reverse('patents:upload')
     success_url = '../upload'
@@ -386,19 +418,35 @@ class FileFieldView(FormView):
 
         form_class = self.get_form_class()
         form = self.get_form(form_class)
-        files = request.FILES.getlist('file_field')
+        files_field = request.FILES.getlist('file_field')
+        directory_field = request.POST.get('directory_field')
         if form.is_valid():
             t0 = time.time()
-            print('len(files): {}, type: {}'.format(len(files), type(files)))
-
-            'filter the files list, if the file name already in the db, then skip it'
-            files = (f for f in files if Patent.objects.filter(filename=f.name).first() is None)
-            with Pool(processes=15) as pool:  # using 15 processes to handle uploaded files
-                file_list = ((f.name, f.read()) for f in files)
-                pool.map(handle_uploaded_file_unpack, file_list)
-                # pool.map(a_handle_uploaded_file, files)
-                pool.close()
-                pool.join()
+            if directory_field:
+                if os.path.exists(directory_field):
+                    print(directory_field)
+                    file_names = os.listdir(directory_field)
+                    'filter the file name list, only take .xml file'
+                    file_names = (name for name in file_names if os.path.splitext(name.lower())[1] == '.xml')
+                    'if the file name already in the db, then skip it'
+                    file_names = (name for name in file_names if Patent.objects.filter(filename=name).first() is None)
+                    'join the file name with the directory path, to get the file path on computer'
+                    file_paths = map(lambda name: os.path.join(directory_field, name), file_names)
+                    with Pool(processes=15) as pool:
+                        pool.map(handle_uploaded_path, file_paths)
+                        pool.close()
+                        pool.join()
+                else:
+                    print("directory doesn't exist")
+            elif files_field:
+                print('len(files): {}, type: {}'.format(len(files_field), type(files_field)))
+                'filter the files list, if the file name already in the db, then skip it'
+                files = (f for f in files_field if Patent.objects.filter(filename=f.name).first() is None)
+                with Pool(processes=15) as pool:  # using 15 processes to handle uploaded files
+                    file_list = ((f.name, f.read()) for f in files)
+                    pool.map(handle_uploaded_file_unpack, file_list)
+                    pool.close()
+                    pool.join()
             print('{}'.format(time.time() - t0))
             return self.form_valid(form)
         else:
