@@ -89,3 +89,13 @@ def build_query_string(queries_dictionary: dict):
 @register.filter
 def is_empty_query(query):
     return query == ['']
+
+
+@register.filter
+def add_int(s, v):
+    return s + v
+
+
+@register.filter
+def minus_int(s, v):
+    return s - v

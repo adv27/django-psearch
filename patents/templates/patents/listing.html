@@ -24,6 +24,7 @@
     {% spaceless %}
         <div class="container cs-wapper">
             <h1>Search time {{ time }}</h1>
+            <h1>Total pages {{ total_pages }}</h1>
             <div class="jumbotron">
                 <div class="col-md-12 patent-navbar">
                     {#                <a href="javascript:void(0)" class="">Home</a>#}
@@ -122,8 +123,10 @@
                 <div class="cs-pagination">
                     <ul class="pagination pagination-circle pg-blue mb-0">
                         {% with queries_dict|pop:'page'|build_query_string as query_string_without_page %}
-                            {% if patents.has_other_pages %}
-                                {% if patents.number !=  1 %}
+                            {#                            {% if patents.has_other_pages %}#}
+                            {% if total_pages > 1 %}
+                                {#                                {% if patents.number !=  1 %}#}
+                                {% if current_page !=  1 %}
                                     <li class="page-item">
                                         <a href="?{{ query_string_without_page }}"
                                            class="page-link waves-effect waves-effect">
@@ -131,17 +134,22 @@
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if patents.has_previous %}
-                                    <li class="page-item">
-                                        <a href="?{{ query_string_without_page }}&page={{ patents.previous_page_number }}"
-                                           class="page-link waves-effect waves-effect">
-                                            &laquo;
-                                        </a>
-                                    </li>
+                                {#                                {% if patents.has_previous %}#}
+                                {% if current_page > 1 %}
+                                    {% with current_page|minus_int:1 as previous_page_number %}
+                                        <li class="page-item">
+                                            {#                                            <a href="?{{ query_string_without_page }}&page={{ patents.previous_page_number }}"#}
+                                            <a href="?{{ query_string_without_page }}&page={{ previous_page_number }}"
+                                               class="page-link waves-effect waves-effect">
+                                                &laquo;
+                                            </a>
+                                        </li>
+                                    {% endwith %}
                                 {% endif %}
 
                                 {% for i in pages %}
-                                    {% if patents.number == i %}
+                                    {#                                    {% if patents.number == i %}#}
+                                    {% if current_page == i %}
                                         <li class="page-item active">
                                             <span class="page-link waves-effect waves-effect">{{ i }}</span>
                                         </li>
@@ -155,16 +163,22 @@
                                     {% endif %}
                                 {% endfor %}
 
-                                {% if patents.has_next %}
-                                    <li class="page-item">
-                                        <a href="?{{ query_string_without_page }}&page={{ patents.next_page_number }}"
-                                           class="page-link waves-effect waves-effect">&raquo;
-                                        </a>
-                                    </li>
+                                {#                                {% if patents.has_next %}#}
+                                {% if current_page < total_pages %}
+                                    {% with current_page|add_int:1 as next_page_number %}
+                                        <li class="page-item">
+                                            {#                                        <a href="?{{ query_string_without_page }}&page={{ patents.next_page_number }}"#}
+                                            <a href="?{{ query_string_without_page }}&page={{ next_page_number }}"
+                                               class="page-link waves-effect waves-effect">&raquo;
+                                            </a>
+                                        </li>
+                                    {% endwith %}
                                 {% endif %}
-                                {% if patents.number !=  patents.paginator.num_pages %}
+                                {#                                {% if patents.number !=  patents.paginator.num_pages %}#}
+                                {% if current_page !=  total_pages %}
                                     <li class="page-item">
-                                        <a href="?{{ query_string_without_page }}&page={{ patents.paginator.num_pages }}"
+                                        {#                                        <a href="?{{ query_string_without_page }}&page={{ patents.paginator.num_pages }}"#}
+                                        <a href="?{{ query_string_without_page }}&page={{ total_pages }}"
                                            class="page-link waves-effect waves-effect">
                                             Last
                                         </a>

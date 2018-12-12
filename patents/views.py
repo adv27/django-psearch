@@ -1,6 +1,7 @@
 import os
 import time
 import urllib.parse as urlparse
+import math
 
 from django import forms
 from django.core.paginator import Paginator
@@ -70,6 +71,7 @@ def search(request):
     t0 = time.time()
     query = request.GET.get('q')
     patent_list = None
+
     if query is not None:
         if query is not '':
             search_field = request.GET.get('field')
@@ -82,7 +84,10 @@ def search(request):
                 patent_list = Patent.objects(**sss)
         else:
             patent_list = Patent.objects.all()
-
+        # using pymongo skip() and limit() to pagination
+        page_no = int(request.GET.get('page', 1))
+        num_pages = math.ceil(patent_list.count() / 10)
+        patent_list = patent_list.skip((page_no - 1) * 10).limit(10)
         # sort
         order_by = request.GET.get('ord')
         if order_by is not None and order_by != '':
@@ -90,6 +95,8 @@ def search(request):
                 patent_list = patent_list.order_by(SORT_BY_MAPPING.get(order_by))
         # calculate time taken to query and sort
         time_query = time.time() - t0
+
+        # t0 = time.time()
 
         # if user already logged in, change the query time of user
         # and update Search Document
@@ -122,10 +129,10 @@ def search(request):
     else:
         return redirect('/search?q={query}'.format(query=''))
 
-    page_no = int(request.GET.get('page', 1))
-    paginator = Paginator(patent_list, 10)  # Show 10 patents per page
-    patents = paginator.get_page(page_no)
-
+    # page_no = int(request.GET.get('page', 1))
+    # paginator = Paginator(patent_list, 10)  # Show 10 patents per page
+    # patents = paginator.get_page(page_no)
+    # patents = patent_list
     '''
     we assume that if there are more than 11 pages 
     (current, 5 before, 5 after) we are always going to show 11 links. 
@@ -135,7 +142,8 @@ def search(request):
         Current page > 6 and < (number of pages - 6): show current page, 5 before and 5 after;
         Current page >= (number of pages -6): show the last 11 pages.
     '''
-    num_pages = paginator.num_pages
+    # num_pages = paginator.num_pages
+    # num_pages = math.ceil(Patent.objects.count() / 10)
 
     if num_pages <= 11 or page_no <= 6:  # case 1 and 2
         pages = [x for x in range(1, min(num_pages + 1, 12))]
@@ -147,14 +155,17 @@ def search(request):
     parsed = urlparse.urlparse(request.build_absolute_uri())
     queries_dict = urlparse.parse_qs(parsed.query, keep_blank_values=True)
 
+    # time_query = time.time() - t0
     context = {
         'search_fields': SEARCH_FIELDS,
         'sort_fields': SORT_BY_FIELDS,
-        'patents': patents,
-        'pages': pages,
-        'queries_dict': queries_dict,
+        'patents': patent_list,
         'time': time_query,
+        'queries_dict': queries_dict,
         'query': query,
+        'pages': pages,
+        'total_pages': num_pages,
+        'current_page': page_no,
     }
 
     return render(request, template_name='patents/listing.html', context=context)
