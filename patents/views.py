@@ -1,14 +1,17 @@
 import os
+import pickle
 import time
 import urllib.parse as urlparse
 import math
 
 from django import forms
 from django.core.paginator import Paginator
-from django.http import (Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse)
-from django.shortcuts import (redirect, render, reverse)
+from django.http import (Http404, HttpResponse, HttpResponseBadRequest,
+                         HttpResponseRedirect, JsonResponse)
+from django.shortcuts import redirect, render, reverse
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.edit import FormView
+from recommend.recommend import Predict
 
 from .forms import FileFieldForm
 from .utils import *
@@ -39,6 +42,14 @@ SORT_BY_MAPPING = {
     '2': '-view',
 }
 
+# try to load LDA models here
+predict = Predict()
+path_doc_topic_matrix = './LDAmodel/doc_topic_matrix.pickle'
+mappingFile = open(path_doc_topic_matrix, 'rb')
+doc_topic_matrix = pickle.load(mappingFile)
+mappingFile.close()
+
+print(list(doc_topic_matrix.keys())[:10])
 
 # Create your views here.
 
@@ -238,6 +249,12 @@ def detail(request, pat_id):
     rate_avg = p.rate
 
     rate_titles = ['bad', 'poor', 'regular', 'good', 'gorgeous']
+
+    # Get recommend
+    user = {}
+    arg = pat_id
+    user[arg] = doc_topic_matrix[arg]
+    predict.run(user, True)
 
     context = {
         'search_fields': SEARCH_FIELDS,
