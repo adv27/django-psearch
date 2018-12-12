@@ -8,7 +8,8 @@ import sys
 import matplotlib
 from gensim import corpora
 from gensim.models import LdaModel
-from utils.utils import *
+
+from .utils.utils import *
 
 
 class Predict():
