@@ -1,9 +1,6 @@
 from django import template
 
-from ..models import (
-    User,
-    Rate,
-)
+from ..models import Rate, User
 
 register = template.Library()
 
@@ -89,6 +86,14 @@ def build_query_string(queries_dictionary: dict):
 @register.filter
 def is_empty_query(query):
     return query == ['']
+
+
+@register.filter
+def word_trim(txt, n):
+    '''
+    Trim text to (n) words
+    '''
+    return ' '.join(txt.split()[:n])
 
 
 @register.filter

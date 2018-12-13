@@ -169,8 +169,6 @@ def main():
 	doc_topic_matrix = pickle.load(mappingFile)
 	mappingFile.close()
 
-	print(list(doc_topic_matrix.keys())[:10])
-
 	if args.api:
 		user = {}
 

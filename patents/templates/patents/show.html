@@ -21,46 +21,56 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container prj-wapper" style="padding-top: 30px">
-        {% if patent %}
-            <div class="table table-filter">
-                <div class="media">
-                    <div class="media-body">
-                        <h4 class="title"><span>{{ patent.title }}</span></h4>
+    <div class="container" style="padding-top: 30px">
+        <div class="row">
+            <div class="col-sm-8 blog-main">
+                {% if patent %}
+                    <div class="table table-filter">
+                        <div class="media">
+                            <div class="media-body">
+                                <h4 class="title"><span>{{ patent.title }}</span></h4>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    <h6 class="tt-tags" style="border-bottom: 1px solid #eee;">
+                        <div class="float-right">
+                            <span class="media-meta" data-toggle="tooltip" data-placement="top">
+                                <i class="fa fa-eye" aria-hidden="true">Views: {{ patent.view }}</i>
+                            </span>
+                        </div>
+                        {% comment %}
+                            Download section
+                        {% endcomment %}
+                        <div class="float-left">
+                            <span class="media-download" data-placement="top">
+                                <a class="fa fa-download" aria-hidden="true" style="margin-right:5px;"
+                                    href="{% url 'patents:download' patent.id %}" download="">Tải về</a>
+                            </span>
+                        </div>
+                    </h6>
+                    <h1>Search time {{ time }}</h1>
+                    <hr>
+                    <div class="pattens-item">
+                        <h3>#-Abstract</h3>
+                        <p style="white-space: pre-line">{{ patent.abstract }}</p>
+                        <h3>#-Content</h3>
+                        <p style="white-space: pre-line">{{ patent.content }}</p>
+                        <br>
+                    </div>
+                    {% include 'patents/includes/rating_summarize.html' %}
+                {% endif %}
             </div>
-            <h6 class="tt-tags" style="border-bottom: 1px solid #eee;">
-                <div class="float-right">
-                    <span class="media-meta" data-toggle="tooltip" data-placement="top">
-                        <i class="fa fa-eye" aria-hidden="true">Views: {{ patent.view }}</i>
-                    </span>
-                </div>
-                {% comment %}
-                    Download section
-                {% endcomment %}
-                <div class="float-left">
-                    <span class="media-download" data-placement="top">
-                         <a class="fa fa-download" aria-hidden="true" style="margin-right:5px;"
-                            href="{% url 'patents:download' patent.id %}" download="">Tải về</a>
-                    </span>
-                </div>
-            </h6>
-            <h1>Search time {{ time }}</h1>
-            <hr>
-            <div class="pattens-item">
-                <h3>#-Abstract</h3>
-                <p style="white-space: pre-line">{{ patent.abstract }}</p>
-                <h3>#-Content</h3>
-                <p style="white-space: pre-line">{{ patent.content }}</p>
-                <br>
-            </div>
-            <div>
-                {% for rr in rec_topics %}
-                    <a href={% url 'patents:show' rr %}>RECCOMEND {{ rr }}</a>
+            {% comment %}
+                Recomend section
+            {% endcomment %}
+            <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+                {% for patent in rec_patents %}
+                    <div class="sidebar-module sidebar-module-inset">
+                        <h5><a href={% url 'patents:show' patent.pk %}>{{ patent.title }}</a></h5>
+                        <p><em>{{ patent.abstract|word_trim:20 }} . . .</em></p>
+                    </div>
                 {% endfor %}
-            </div
-            {% include 'patents/includes/rating_summarize.html' %}
-        {% endif %}
+            </div>
+        </div>
     </div>
 {% endblock %}

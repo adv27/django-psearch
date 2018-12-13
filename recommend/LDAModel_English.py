@@ -16,7 +16,7 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.stem.snowball import SnowballStemmer
 from pymongo import MongoClient
-from settings import MONGO_CONNECTION
+from settings import MAPPING_TEXT, MAPPING_TITLE, MONGO_CONNECTION
 
 # setup nltk resource
 nltk.download('stopwords')
@@ -82,8 +82,8 @@ class LDAModel:
 			try:
 				link = ''
 				# title = patent['title']
-				title = patent['abstract'].lower()
-				text = patent['content'].lower()
+				title = patent[MAPPING_TITLE].lower()
+				text = patent[MAPPING_TEXT].lower()
 			except IndexError:
 				continue
 
@@ -157,7 +157,7 @@ class LDAModel:
 		doc_topic_matrix = {}
 		count = 0
 		print('CORPUS: {}'.format(len(corpus)))
-		
+
 		if self.index_mapping is True:
 			for doc in corpus:
 				dense_vector = {}

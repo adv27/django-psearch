@@ -49,15 +49,12 @@ mappingFile = open(path_doc_topic_matrix, 'rb')
 doc_topic_matrix = pickle.load(mappingFile)
 mappingFile.close()
 
-print(list(doc_topic_matrix.keys())[:10])
-
 # Create your views here.
 
 
 def index(request):
-    context = {
-
-    }
+    context = {}
+    
     return render(request, template_name='patents/index.html', context=context)
 
 
@@ -191,13 +188,13 @@ def detail(request, pat_id):
         print(e)
         raise Http404
     time_query = time.time() - t0
-    
     # Increase view times
     p.view += 1
     p.save()
 
     # Checking if user is logged in
     # If user is logged in => get user's rate for this patent
+    u = None
     r = None
     try:
         uid = request.session.get('user_id', False)
@@ -210,6 +207,11 @@ def detail(request, pat_id):
                 )
             except DoesNotExist:
                 r = None
+
+            '''Adding this patent to user views'''
+            if p not in u.views:
+                u.views.append(p)
+                u.save()
 
             'modify View Document'
             # if request has 'ref' param => the request come from search page
@@ -239,7 +241,6 @@ def detail(request, pat_id):
                         ref=ref,
                         user=u.user_name)
                     )
-
     except DoesNotExist:
         pass
 
@@ -253,12 +254,18 @@ def detail(request, pat_id):
     rate_titles = ['bad', 'poor', 'regular', 'good', 'gorgeous']
 
     # Get recommend
-    user = {}
-    arg = pat_id
-    user[arg] = doc_topic_matrix[arg]
-    rec = predict.run(user, False)
-    for rr in rec:
-        print(rr)
+    user_dict = {}
+    if settings.USE_USER_HISTORY and u:
+        args = list(map(lambda p: str(p.pk), u.views))
+    else:
+        args = [pat_id]
+    for arg in args:
+        user_dict[arg] = doc_topic_matrix[arg]
+    rec_ids = predict.run(user_dict, False)
+    rec_patents = []
+    for patent_id in rec_ids:
+        pat = Patent.objects.get(id=patent_id)
+        rec_patents.append(pat)
 
     context = {
         'search_fields': SEARCH_FIELDS,
@@ -274,7 +281,7 @@ def detail(request, pat_id):
     })
 
     context.update({
-        'rec_topics': rec
+        'rec_patents': rec_patents,
     })
 
     return render(request, template_name='patents/show.html', context=context)
