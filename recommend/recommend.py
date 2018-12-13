@@ -158,7 +158,7 @@ def main():
 	logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--shell", default=False, help="Interactive environment for recommending items")
-	parser.add_argument("--index", default=True, help="Find by index")
+	parser.add_argument("--index", default=False, help="Find by index")
 	parser.add_argument("--SBCF", default=0, help="Under development")
 	parser.add_argument("--api", default=False,  help="Article # that you want to get recommendation out of")
 	args = parser.parse_args()

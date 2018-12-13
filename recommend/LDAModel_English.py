@@ -229,7 +229,7 @@ class LDAModel:
 
 if __name__ == '__main__':
 	parser = ArgumentParser(description="LDAModel", formatter_class=RawDescriptionHelpFormatter)
-	parser.add_argument("-i", "--index", default=True, help="Mapping by index")
+	parser.add_argument("-i", "--index", default=False, help="Mapping by index")
 
 	args = parser.parse_args()
 
