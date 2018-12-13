@@ -1,8 +1,8 @@
+import math
 import os
 import pickle
 import time
 import urllib.parse as urlparse
-import math
 
 from django import forms
 from django.core.paginator import Paginator
@@ -43,7 +43,7 @@ SORT_BY_MAPPING = {
 }
 
 # try to load LDA models here
-predict = Predict()
+predict = Predict(num_of_rec=settings.NUMBER_OF_RECOMMENDATION)
 path_doc_topic_matrix = './LDAmodel/doc_topic_matrix.pickle'
 mappingFile = open(path_doc_topic_matrix, 'rb')
 doc_topic_matrix = pickle.load(mappingFile)
@@ -52,6 +52,7 @@ mappingFile.close()
 print(list(doc_topic_matrix.keys())[:10])
 
 # Create your views here.
+
 
 def index(request):
     context = {
@@ -190,6 +191,7 @@ def detail(request, pat_id):
         print(e)
         raise Http404
     time_query = time.time() - t0
+    
     # Increase view times
     p.view += 1
     p.save()
@@ -254,17 +256,26 @@ def detail(request, pat_id):
     user = {}
     arg = pat_id
     user[arg] = doc_topic_matrix[arg]
-    predict.run(user, True)
+    rec = predict.run(user, False)
+    for rr in rec:
+        print(rr)
 
     context = {
         'search_fields': SEARCH_FIELDS,
         'patent': p,
         'time': time_query,
+    }
+
+    context.update({
         'user_rating': r.rating if r is not None else None,
         'rate_titles': rate_titles,
         'rate_count': rate_count,
         'rate_avg': rate_avg,
-    }
+    })
+
+    context.update({
+        'rec_topics': rec
+    })
 
     return render(request, template_name='patents/show.html', context=context)
 

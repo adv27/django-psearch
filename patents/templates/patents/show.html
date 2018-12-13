@@ -13,6 +13,7 @@
     {#            src="{% static 'bower_components/bootstrap-3.3.7/dist/js/bootstrap.min.js' %}"></script>#}
     <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/rating.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'patents/styles/style.css' %}">
+    <title>{{ patent.title }}</title>
 {% endblock %}
 
 {% block nav %}
@@ -54,6 +55,11 @@
                 <p style="white-space: pre-line">{{ patent.content }}</p>
                 <br>
             </div>
+            <div>
+                {% for rr in rec_topics %}
+                    <a href={% url 'patents:show' rr %}>RECCOMEND {{ rr }}</a>
+                {% endfor %}
+            </div
             {% include 'patents/includes/rating_summarize.html' %}
         {% endif %}
     </div>

@@ -13,14 +13,14 @@ from .utils.utils import *
 
 
 class Predict():
-	def __init__(self):
+	def __init__(self, num_of_rec = 10):
 		# current_working_dir = '/home/etu/eason/nodejs/Semantic_Aware_RecSys'
 		current_working_dir = '.'
 		os.chdir(current_working_dir)
 		lda_model_path = "./LDAmodel/final_ldamodel"
 
 		self.lda = LdaModel.load(lda_model_path)
-		self.no_of_recommendation = 10
+		self.no_of_recommendation = num_of_rec
 		self.omit_topic_below_this_fraction = 0.1
 		self.mapping = self.__init_mapping()
 		self.linkMapping = self.__init_Link_mapping()
@@ -127,9 +127,11 @@ class Predict():
 			for title in user_dict:
 				print('You viewed : {0}'.format(self.mapping[title]))
 			self.getLink(sort, self.no_of_recommendation)
-		else:
-			print('You viewed : [' + reduce(lambda x, y: x+'] & ['+y, map(lambda title: self.mapping[title], user_dict)) + ']; Your Recommendations : ;' + reduce(lambda x, y: x+';'+y,
-																																								  map(lambda i: self.mapping[int(i)], recommend_str.split(','))) + ' &&' + reduce(lambda x, y: x+';'+y, map(lambda i: self.linkMapping[int(i)], recommend_str.split(','))))
+		# else:
+		# 	print('You viewed : [' + reduce(lambda x, y: x+'] & ['+y, map(lambda title: self.mapping[title], user_dict)) + ']; Your Recommendations : ;' + reduce(lambda x, y: x+';'+y,
+		# 																																						  map(lambda i: self.mapping[int(i)], recommend_str.split(','))) + ' &&' + reduce(lambda x, y: x+';'+y, map(lambda i: self.linkMapping[int(i)], recommend_str.split(','))))
+
+		return list(sort.keys())[:self.no_of_recommendation]
 
 	# def get(self, user_dict):
 	#     load_path = './LDAmodel/corpus.pickle'
