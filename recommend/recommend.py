@@ -102,7 +102,7 @@ class Predict():
 		Get recommendations from the user_dict which describes the topic distribution attibutes to a user/item 
 		If verbose = True, return the result in a verbose way.
 		'''
-		print('User dict: {}'.format(user_dict))
+		# print('User dict: {}'.format(user_dict))
 		user_topic_matrix = self.constructUserToTopicMatrix(user_dict, verbose)
 		recommend_dict = {}
 

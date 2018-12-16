@@ -4,11 +4,9 @@ MONGO_CONNECTION = {
     'collection': 'patent',
 }
 
-# MAPPING_TITLE = 'title'
-# MAPPING_TEXT = 'abstract'
+# number of topics
+NUM_TOPICS = 150
 
-MAPPING_TITLE = 'abstract'
-MAPPING_TEXT = 'content'
+MAPPING_TITLE = 'title'
 
-# MAPPING_TITLE = 'title'
-# MAPPING_TEXT = 'content'
+DATA_FIELDS = ['title', 'abstract', 'content']

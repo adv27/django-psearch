@@ -16,7 +16,7 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.stem.snowball import SnowballStemmer
 from pymongo import MongoClient
-from settings import MAPPING_TEXT, MAPPING_TITLE, MONGO_CONNECTION
+from settings import DATA_FIELDS, MAPPING_TITLE, MONGO_CONNECTION, NUM_TOPICS
 
 # setup nltk resource
 nltk.download('stopwords')
@@ -35,7 +35,7 @@ class LDAModel:
 		# Minimun length of single document
 		self.min_length = 200
 		# Num_topics in LDA
-		self.num_topics = 90
+		self.num_topics = NUM_TOPICS
 		# Filter out tokens that appear in less than `no_below` documents (absolute number)
 		self.no_below_this_number = 50
 		# Filter out tokens that appear in more than `no_above` documents (fraction of total corpus size, *not* absolute number).
@@ -81,9 +81,8 @@ class LDAModel:
 			text = ''
 			try:
 				link = ''
-				# title = patent['title']
 				title = patent[MAPPING_TITLE].lower()
-				text = patent[MAPPING_TEXT].lower()
+				text = ' '.join(map(lambda field: patent[field], DATA_FIELDS)).lower()
 			except IndexError:
 				continue
 
