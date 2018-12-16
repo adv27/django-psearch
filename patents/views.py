@@ -54,7 +54,7 @@ mappingFile.close()
 
 def index(request):
     context = {}
-    
+
     return render(request, template_name='patents/index.html', context=context)
 
 
@@ -213,9 +213,11 @@ def detail(request, pat_id):
                 u.views.append(p)
                 u.save()
 
-            'modify View Document'
-            # if request has 'ref' param => the request come from search page
-            # 'ref' param = search keyword
+            '''
+            Modify View Document
+            If request has 'ref' param => the request come from search page
+            'ref' param = search keyword
+            '''
             ref = request.GET.get('ref')
             if ref is not None:
                 try:
@@ -253,10 +255,15 @@ def detail(request, pat_id):
 
     rate_titles = ['bad', 'poor', 'regular', 'good', 'gorgeous']
 
-    # Get recommend
+    '''
+    Get recommendation
+    If (USE_USER_HISTORY) is True then use latest (N_RECENTLY_VIEWED) viewed patent 
+    to generate user_dict
+    '''
     user_dict = {}
     if settings.USE_USER_HISTORY and u:
-        args = list(map(lambda p: str(p.pk), u.views))
+        args = list(map(lambda p: str(p.pk), u.views[-settings.N_RECENTLY_VIEWED:]))
+        # print(args)
     else:
         args = [pat_id]
     for arg in args:

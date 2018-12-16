@@ -33,7 +33,7 @@ class User(Document):
     query_first = DateTimeField(help_text='Date/time of first query')
     query_last = DateTimeField(help_text='Date/time of latest query')
     query_count = IntField(help_text='Query times', default=0)
-    views = SortedListField(ReferenceField(Patent))
+    views = ListField(ReferenceField(Patent))
 
 class Rate(Document):
     user_id = ReferenceField(User)
