@@ -70,8 +70,7 @@ def pop(dictionary: dict, v):
 
 @register.filter
 def build_query_string(queries_dictionary: dict):
-    """
-        Building query string from a dictionary of queries
+    """Building query string from a dictionary of queries
         ex: {
             'search' : [2],
             'q': ['Hello world'],
@@ -90,9 +89,7 @@ def is_empty_query(query):
 
 @register.filter
 def word_trim(txt, n):
-    '''
-    Trim text to (n) words
-    '''
+    """Trim text to (n) words"""
     return ' '.join(txt.split()[:n])
 
 

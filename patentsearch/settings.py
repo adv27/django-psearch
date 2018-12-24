@@ -130,3 +130,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
+
+ITEMS_PER_PAGE = 10
+
+BULK_INSERT_PROCESSES = 15

@@ -1,18 +1,46 @@
-from collections import Counter
+import json
 import os
+from collections import Counter
 
 from django.conf import settings
+from django.core.files import File
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
-from django.core.files import File
 
 from .models import *
 
+def handle_file_path(path):
+    '''Read file's content by path
+    Return a dictionary contains file name and it's content
+    '''
+    with open(path, 'rb') as f:
+        django_f = File(f)
+        f_name = os.path.basename(django_f.name)
+        return {
+            'name': f_name,
+            'content': django_f.read()
+        }
+
+
+def xml2patent(xml):
+    import xmltodict
+
+    _dict = xmltodict.parse(xml)
+    _json = json.dumps(_dict)
+    doc = json.loads(_json)
+
+def get_file_content(path):
+    with open(path, 'rb') as f:
+        return f.read()
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
 
 def get_rate_percentage(rates):
-    """
-        Return percentage of each rating point (1->5) of 1 patent
-    """
+    """Return percentage of each rating point (1->5) of 1 patent."""
     c = Counter(list(map(lambda _r: _r.rating, rates)))
     rate_count = dict(c)
     rate_times = len(rates)
@@ -87,9 +115,7 @@ def save_mongo(filename, doc):
             content=detail,
         )
         patent = loads(patent.to_json())  # Document to JSON then to BSON
-        '''
-        Using pymongo client for multi processes purpose
-        '''
+        '''Using pymongo client for multi processes purpose.'''
         host = settings.MONGODB_HOST
         port = settings.MONGODB_PORT
         db = settings.MONGODB_NAME
