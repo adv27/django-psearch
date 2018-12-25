@@ -103,6 +103,11 @@ def search_api(request):
             fil = {
                 search_field_verbose: regx
             }
+            if search_field == '3':
+                fil = {
+                    "$text": {"$search": query}
+                }
+
 
     # patents = search_patent(fil=fil, order_by=sort_option, skip=start, limit=settings.ITEMS_PER_PAGE)
     result = search_patent(fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE)
