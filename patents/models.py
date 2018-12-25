@@ -2,6 +2,7 @@ from datetime import datetime
 
 from mongoengine import *
 
+
 # Create your models here.
 
 class Patent(Document):
@@ -14,18 +15,6 @@ class Patent(Document):
     rate = FloatField(help_text='Average rating', default=0)
     view = IntField(help_text='View times', default=0)
 
-    meta = {
-        'indexes': [
-            {
-                'fields': [
-                    '$title',
-                    '$abstract',
-                    '$content',
-                ], 'default_language': 'english',
-            }
-        ],
-    }
-
 
 class User(Document):
     user_name = StringField(help_text='Login name', required=True)
@@ -34,6 +23,7 @@ class User(Document):
     query_last = DateTimeField(help_text='Date/time of latest query')
     query_count = IntField(help_text='Query times', default=0)
     views = ListField(ReferenceField(Patent))
+
 
 class Rate(Document):
     user_id = ReferenceField(User)

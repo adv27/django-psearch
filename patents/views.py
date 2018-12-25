@@ -1,5 +1,6 @@
 import math
 import pickle
+import re
 import time
 import urllib.parse as urlparse
 
@@ -11,10 +12,8 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.generic.edit import FormView
 
 from recommend.recommend import Predict
-from .utils import *
 from .search import search_patent
-
-import re
+from .utils import *
 
 SEARCH_FIELDS = {
     '0': 'All',
@@ -100,14 +99,13 @@ def search_api(request):
         if search_field in SEARCH_FIELD_MAPPING:
             search_field_verbose = SEARCH_FIELD_MAPPING[search_field]
             regx = re.compile('.*{}.*'.format(query), re.IGNORECASE)
-            fil = {
-                search_field_verbose: regx
-            }
-            if search_field == '3':
-                fil = {
-                    "$text": {"$search": query}
-                }
+            f1 = {search_field_verbose: regx} if search_field_verbose != 'all_fields' else None
+            f2 = {"$text": {"$search": query}}
 
+            if f1 is not None:
+                fil = {'$and': [f1, f2]}
+            else:
+                fil = f2
 
     # patents = search_patent(fil=fil, order_by=sort_option, skip=start, limit=settings.ITEMS_PER_PAGE)
     result = search_patent(fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE)
