@@ -8,7 +8,7 @@ db = client[settings.MONGODB_NAME]
 col = db.patent
 
 
-def search_patent(fil, skip, limit=settings.ITEMS_PER_PAGE):
+def search_patent(fil, skip, limit=settings.ITEMS_PER_PAGE, ret_dict=True):
     time_search_start = time.time()
 
     cursor = col.find(fil, {'_id': False}).skip(skip).limit(limit)
@@ -20,8 +20,11 @@ def search_patent(fil, skip, limit=settings.ITEMS_PER_PAGE):
     time_search_end = time.time()
     search_time = time_search_end - time_search_start
 
-    return {
-        'search_time': search_time,
-        'count': count,
-        'patents': patents
-    }
+    if ret_dict:
+        return {
+            'search_time': search_time,
+            'count': count,
+            'patents': patents
+        }
+    else:
+        return patents
