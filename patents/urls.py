@@ -9,6 +9,7 @@ urlpatterns = [
     # path('upload', views.upload, name='upload'),
     path('upload', FileFieldView.as_view(), name='upload'),
     path('search', views.search, name='search'),
+    path('search_api', views.search_api, name='search_api'),
     path('show/<str:pat_id>', views.detail, name='show'),
     path('download/<str:pat_id>', views.download, name='download')
 ]

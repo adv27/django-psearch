@@ -54,9 +54,9 @@ def bulk(paths):
     # connect to mongodb
     host = settings.MONGODB_HOST
     port = settings.MONGODB_PORT
-    db = settings.MONGODB_NAME
-    client = MongoClient(host, port)[db]
-    db = client.patent
+    client = MongoClient(host, port)
+    db = client[settings.MONGODB_NAME]
+    col = db.patent
 
-    result = db.insert_many(patents_bson)
+    result = col.insert_many(patents_bson)
     # print(result.inserted_id)
