@@ -141,14 +141,19 @@ def search(request):
                 else:
                     patent_list = Patent.objects.search_text(query)
             elif search_field in SEARCH_FIELD_MAPPING:
-                field = SEARCH_FIELD_MAPPING[search_field]
-                sss = {
-                    '{field}__icontains'.format(field=field): query
-                }
-                if sort_option is not None:
-                    patent_list = Patent.objects(**sss).order_by(sort_option)
+                # if search by content, use pymongo instead
+                if search_field == '3':
+                    fil = {"$text": {"$search": query}}
+                    patent_list = search_patent(fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE)
                 else:
-                    patent_list = Patent.objects(**sss)
+                    field = SEARCH_FIELD_MAPPING[search_field]
+                    sss = {
+                        '{field}__icontains'.format(field=field): query
+                    }
+                    if sort_option is not None:
+                        patent_list = Patent.objects(**sss).order_by(sort_option)
+                    else:
+                        patent_list = Patent.objects(**sss)
 
             num_pages = math.ceil(patent_list.count() / settings.ITEMS_PER_PAGE)
             patent_list = patent_list[start: end]
