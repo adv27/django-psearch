@@ -135,6 +135,7 @@ def search(request):
 
         if query is not '':
             search_field = request.GET.get('field')
+            flag = False
             if search_field is None or search_field == '' or search_field == '0':
                 if sort_option is not None:
                     patent_list = Patent.objects.search_text(query).order_by(sort_option)
@@ -143,8 +144,12 @@ def search(request):
             elif search_field in SEARCH_FIELD_MAPPING:
                 # if search by content, use pymongo instead
                 if search_field == '3':
+                    flag = True
                     fil = {"$text": {"$search": query}}
-                    patent_list = search_patent(fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE)
+                    patent_list, count = search_patent(
+                        fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE, ret_dict=False
+                    )
+                    num_pages = math.ceil(count / settings.ITEMS_PER_PAGE)
                 else:
                     field = SEARCH_FIELD_MAPPING[search_field]
                     sss = {
@@ -154,9 +159,9 @@ def search(request):
                         patent_list = Patent.objects(**sss).order_by(sort_option)
                     else:
                         patent_list = Patent.objects(**sss)
-
-            num_pages = math.ceil(patent_list.count() / settings.ITEMS_PER_PAGE)
-            patent_list = patent_list[start: end]
+            if not flag:
+                num_pages = math.ceil(patent_list.count() / settings.ITEMS_PER_PAGE)
+                patent_list = patent_list[start: end]
         else:
             if sort_option is not None:
                 patent_list = Patent.objects.order_by(sort_option)[start: end]

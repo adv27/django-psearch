@@ -11,11 +11,15 @@ col = db.patent
 def search_patent(fil, skip, limit=settings.ITEMS_PER_PAGE, ret_dict=True):
     time_search_start = time.time()
 
-    cursor = col.find(fil, {'_id': False}).skip(skip).limit(limit)
+    cursor = col.find(fil).skip(skip).limit(limit)
     count = cursor.count()
     patents = []
     for document in cursor:
-        patents.append(document['title'])
+        # patents.append(document['title'])
+        str_id = str(document['_id'])
+        del(document['_id'])
+        document['id'] = str_id
+        patents.append(document)
 
     time_search_end = time.time()
     search_time = time_search_end - time_search_start
@@ -27,4 +31,4 @@ def search_patent(fil, skip, limit=settings.ITEMS_PER_PAGE, ret_dict=True):
             'patents': patents
         }
     else:
-        return patents
+        return patents, count
