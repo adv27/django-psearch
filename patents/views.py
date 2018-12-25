@@ -12,6 +12,9 @@ from django.views.generic.edit import FormView
 
 from recommend.recommend import Predict
 from .utils import *
+from .search import search_patent
+
+import re
 
 SEARCH_FIELDS = {
     '0': 'All',
@@ -78,58 +81,33 @@ def download(request, pat_id):
 
 def search_api(request):
     query = request.GET.get('q')
-    patent_list = None
+    fil = {}
 
-    if query is not None:
-        t0 = time.time()
+    if query is None:
+        return redirect('/search?q={query}'.format(query=''))
 
-        '''Just as with traditional ORMs, you may limit the number of results returned or skip a number or results in you query. limit() and skip() and methods are available on QuerySet objects, but the array-slicing syntax is preferred for achieving this.
-        http://docs.mongoengine.org/guide/querying.html#limiting-and-skipping-results
-        '''
-        page_no = int(request.GET.get('page', 1))
-        start = (page_no - 1) * settings.ITEMS_PER_PAGE
-        end = start + settings.ITEMS_PER_PAGE
+    page_no = int(request.GET.get('page', 1))
+    start = (page_no - 1) * settings.ITEMS_PER_PAGE
 
-        # get sort option
-        order_by = request.GET.get('ord')
-        sort_option = None
-        if order_by is not None and order_by != '':
-            sort_option = SORT_BY_MAPPING.get(order_by, None)
+    # get sort option
+    order_by = request.GET.get('ord')
+    sort_option = None
+    if order_by is not None and order_by != '':
+        sort_option = SORT_BY_MAPPING.get(order_by, None)
 
-        if query is not '':
-            search_field = request.GET.get('field')
-            if search_field is None or search_field == '' or search_field == '0':
-                if sort_option is not None:
-                    patent_list = Patent.objects.search_text(query).order_by(sort_option)
-                else:
-                    patent_list = Patent.objects.search_text(query)
-            elif search_field in SEARCH_FIELD_MAPPING:
-                field = SEARCH_FIELD_MAPPING[search_field]
-                sss = {
-                    '{field}__icontains'.format(field=field): query
-                }
-                if sort_option is not None:
-                    patent_list = Patent.objects(**sss).order_by(sort_option)
-                else:
-                    patent_list = Patent.objects(**sss)
+    if query is not '':
+        search_field = request.GET.get('field')
+        if search_field in SEARCH_FIELD_MAPPING:
+            search_field_verbose = SEARCH_FIELD_MAPPING[search_field]
+            regx = re.compile('.*{}.*'.format(query), re.IGNORECASE)
+            fil = {
+                search_field_verbose: regx
+            }
 
-            num_pages = math.ceil(patent_list.count() / settings.ITEMS_PER_PAGE)
-            patent_list = patent_list[start: end]
-        else:
-            if sort_option is not None:
-                patent_list = Patent.objects.order_by(sort_option)[start: end]
-            else:
-                patent_list = Patent.objects[start: end]
-            num_pages = Patent.objects.count()
+    # patents = search_patent(fil=fil, order_by=sort_option, skip=start, limit=settings.ITEMS_PER_PAGE)
+    result = search_patent(fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE)
 
-        # calculate time taken to query, sort and paginate
-        time_query = time.time() - t0
-
-        return JsonResponse({
-            'time': time_query,
-            'pages': num_pages,
-            'patents': list(map(lambda p: p['title'], patent_list))
-        })
+    return JsonResponse(result)
 
 
 def search(request):
@@ -177,6 +155,10 @@ def search(request):
             else:
                 patent_list = Patent.objects[start: end]
             num_pages = Patent.objects.count()
+
+        patents = []
+        for p in patent_list:
+            patents.append(p)
 
         # calculate time taken to query, sort and paginate
         time_query = time.time() - t0
@@ -236,7 +218,7 @@ def search(request):
     context = {
         'search_fields': SEARCH_FIELDS,
         'sort_fields': SORT_BY_FIELDS,
-        'patents': patent_list,
+        'patents': patents,
         'time': time_query,
         'queries_dict': queries_dict,
         'query': query,
