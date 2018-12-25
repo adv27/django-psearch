@@ -9,6 +9,7 @@ from django.core.files.storage import FileSystemStorage
 
 from .models import *
 
+
 def handle_file_path(path):
     '''Read file's content by path
     Return a dictionary contains file name and it's content
@@ -29,9 +30,11 @@ def xml2patent(xml):
     _json = json.dumps(_dict)
     doc = json.loads(_json)
 
+
 def get_file_content(path):
     with open(path, 'rb') as f:
         return f.read()
+
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
@@ -126,6 +129,25 @@ def save_mongo(filename, doc):
 
     except Exception as e:
         raise e
+
+
+def get_paginate(page_no, num_pages):
+    """We assume that if there are more than 11 pages
+    (current, 5 before, 5 after) we are always going to show 11 links.
+    Now we have 4 cases:
+        Number of pages < 11: show all pages;
+        Current page <= 6: show first 11 pages;
+        Current page > 6 and < (number of pages - 6): show current page, 5 before and 5 after;
+        Current page >= (number of pages -6): show the last 11 pages.
+    """
+    if num_pages <= 11 or page_no <= 6:  # case 1 and 2
+        pages = [x for x in range(1, min(num_pages + 1, 12))]
+    elif page_no > num_pages - 6:  # case 4
+        pages = [x for x in range(num_pages - 10, num_pages + 1)]
+    else:  # case 3
+        pages = [x for x in range(page_no - 5, page_no + 6)]
+
+    return pages
 
 
 def get_values_recursive(obj):

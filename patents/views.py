@@ -108,126 +108,115 @@ def search_api(request):
                 fil = f2
 
     # patents = search_patent(fil=fil, order_by=sort_option, skip=start, limit=settings.ITEMS_PER_PAGE)
-    result = search_patent(fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE)
+    patents, count, search_time = search_patent(fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE, time_search=True)
 
-    return JsonResponse(result)
+    return JsonResponse({
+        'search_time': search_time,
+        'count': count,
+        'patents': patents
+    })
 
 
 def search(request):
     query = request.GET.get('q')
     patent_list = None
 
-    if query is not None:
-        t0 = time.time()
-
-        '''Just as with traditional ORMs, you may limit the number of results returned or skip a number or results in you query. limit() and skip() and methods are available on QuerySet objects, but the array-slicing syntax is preferred for achieving this.
-        http://docs.mongoengine.org/guide/querying.html#limiting-and-skipping-results
-        '''
-        page_no = int(request.GET.get('page', 1))
-        start = (page_no - 1) * settings.ITEMS_PER_PAGE
-        end = start + settings.ITEMS_PER_PAGE
-
-        # get sort option
-        order_by = request.GET.get('ord')
-        sort_option = None
-        if order_by is not None and order_by != '':
-            sort_option = SORT_BY_MAPPING.get(order_by, None)
-
-        if query is not '':
-            search_field = request.GET.get('field')
-            flag = False
-            if search_field is None or search_field == '' or search_field == '0':
-                if sort_option is not None:
-                    patent_list = Patent.objects.search_text(query).order_by(sort_option)
-                else:
-                    patent_list = Patent.objects.search_text(query)
-            elif search_field in SEARCH_FIELD_MAPPING:
-                # if search by content, use pymongo instead
-                if search_field == '3':
-                    flag = True
-                    fil = {"$text": {"$search": query}}
-                    patent_list, count = search_patent(
-                        fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE, ret_dict=False
-                    )
-                    num_pages = math.ceil(count / settings.ITEMS_PER_PAGE)
-                else:
-                    field = SEARCH_FIELD_MAPPING[search_field]
-                    sss = {
-                        '{field}__icontains'.format(field=field): query
-                    }
-                    if sort_option is not None:
-                        patent_list = Patent.objects(**sss).order_by(sort_option)
-                    else:
-                        patent_list = Patent.objects(**sss)
-            if not flag:
-                num_pages = math.ceil(patent_list.count() / settings.ITEMS_PER_PAGE)
-                patent_list = patent_list[start: end]
-        else:
-            if sort_option is not None:
-                patent_list = Patent.objects.order_by(sort_option)[start: end]
-            else:
-                patent_list = Patent.objects[start: end]
-            num_pages = Patent.objects.count()
-
-        patents = []
-        for p in patent_list:
-            patents.append(p)
-
-        # calculate time taken to query, sort and paginate
-        time_query = time.time() - t0
-
-        '''
-        If user already logged in, change the query time of user
-        and update Search Document.
-        '''
-        if request.session.get('user_id', False):
-            uid = request.session.get('user_id')
-            'modify user document'
-            u = User.objects.get(id=uid)
-            # increase query_count
-            u.query_count += 1
-            # modify user first_query, last_query
-            u.query_last = datetime.now()
-            if u.query_first is None:
-                u.query_first = datetime.now()
-            u.save()  # save the change
-
-            'modify search document'
-            try:
-                s = Search.objects.get(
-                    user_id=u,
-                    keyword=query,
-                )
-                s.date = datetime.now()
-            except DoesNotExist:
-                s = Search(
-                    user_id=u,
-                    keyword=query,
-                    date=datetime.now(),
-                )
-            s.save()
-    else:
+    if query is None:
         return redirect('/search?q={query}'.format(query=''))
 
-    '''We assume that if there are more than 11 pages 
-    (current, 5 before, 5 after) we are always going to show 11 links. 
-    Now we have 4 cases:
-        Number of pages < 11: show all pages;
-        Current page <= 6: show first 11 pages;
-        Current page > 6 and < (number of pages - 6): show current page, 5 before and 5 after;
-        Current page >= (number of pages -6): show the last 11 pages.
+    t0 = time.time()
+
+    '''Just as with traditional ORMs, you may limit the number of results returned or skip a number or results in you query. limit() and skip() and methods are available on QuerySet objects, but the array-slicing syntax is preferred for achieving this.
+    http://docs.mongoengine.org/guide/querying.html#limiting-and-skipping-results
     '''
-    if num_pages <= 11 or page_no <= 6:  # case 1 and 2
-        pages = [x for x in range(1, min(num_pages + 1, 12))]
-    elif page_no > num_pages - 6:  # case 4
-        pages = [x for x in range(num_pages - 10, num_pages + 1)]
-    else:  # case 3
-        pages = [x for x in range(page_no - 5, page_no + 6)]
+    page_no = int(request.GET.get('page', 1))
+    start = (page_no - 1) * settings.ITEMS_PER_PAGE
+    end = start + settings.ITEMS_PER_PAGE
+
+    # get sort option
+    order_by = request.GET.get('ord')
+    sort_option = None
+    if order_by is not None and order_by != '':
+        sort_option = SORT_BY_MAPPING.get(order_by, None)
+
+    if query is not '':
+        search_field = request.GET.get('field')
+        flag = False
+        if search_field is None or search_field == '' or search_field == '0':
+            if sort_option is not None:
+                patent_list = Patent.objects.search_text(query).order_by(sort_option)
+            else:
+                patent_list = Patent.objects.search_text(query)
+        elif search_field in SEARCH_FIELD_MAPPING:
+            # if search by content, use pymongo instead
+            if search_field == '3':
+                flag = True
+                fil = {"$text": {"$search": query}}
+                patent_list, count = search_patent(
+                    fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE
+                )
+                num_pages = math.ceil(count / settings.ITEMS_PER_PAGE)
+            else:
+                field = SEARCH_FIELD_MAPPING[search_field]
+                sss = {
+                    '{field}__icontains'.format(field=field): query
+                }
+                if sort_option is not None:
+                    patent_list = Patent.objects(**sss).order_by(sort_option)
+                else:
+                    patent_list = Patent.objects(**sss)
+        if not flag:
+            num_pages = math.ceil(patent_list.count() / settings.ITEMS_PER_PAGE)
+            patent_list = patent_list[start: end]
+    else:
+        if sort_option is not None:
+            patent_list = Patent.objects.order_by(sort_option)[start: end]
+        else:
+            patent_list = Patent.objects[start: end]
+        num_pages = Patent.objects.count()
+
+    patents = []
+    for p in patent_list:
+        patents.append(p)
+
+    # calculate time taken to query, sort and paginate
+    time_query = time.time() - t0
+
+    '''If user already logged in, change the query time of user
+    and update Search Document.
+    '''
+    if request.session.get('user_id', False):
+        uid = request.session.get('user_id')
+        'modify user document'
+        u = User.objects.get(id=uid)
+        # increase query_count
+        u.query_count += 1
+        # modify user first_query, last_query
+        u.query_last = datetime.now()
+        if u.query_first is None:
+            u.query_first = datetime.now()
+        u.save()  # save the change
+
+        'modify search document'
+        try:
+            s = Search.objects.get(
+                user_id=u,
+                keyword=query,
+            )
+            s.date = datetime.now()
+        except DoesNotExist:
+            s = Search(
+                user_id=u,
+                keyword=query,
+                date=datetime.now(),
+            )
+        s.save()
+
+    pages = get_paginate(page_no, num_pages)
 
     parsed = urlparse.urlparse(request.build_absolute_uri())
     queries_dict = urlparse.parse_qs(parsed.query, keep_blank_values=True)
 
-    # time_query = time.time() - t0
     context = {
         'search_fields': SEARCH_FIELDS,
         'sort_fields': SORT_BY_FIELDS,
