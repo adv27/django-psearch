@@ -145,7 +145,7 @@ def search(request):
 
     patents = []
     count = None
-    if query is not '' and search_field == '3':
+    if (query is not '' and search_field == '3') or search_field is None:
         '''If user search patent by content
         Use pymongo to handle text search
         '''
