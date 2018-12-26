@@ -27,14 +27,11 @@
             <h1>Total pages {{ total_pages }}</h1>
             <div class="jumbotron">
                 <div class="col-md-12 patent-navbar">
-                    {#                <a href="javascript:void(0)" class="">Home</a>#}
-                    {#                <a href="javascript:void(0)" class="">Pricing</a>#}
-                    {#                <a href="javascript:void(0)" class="">Disabled</a>#}
                     {% with queries_dict|pop:'page'|pop:'ord'|build_query_string as query_string_without_page_sort %}
                         {% for value, text in sort_fields.items %}
                             <a href="?{{ query_string_without_page_sort }}&ord={{ value }}"
                                class="patent-sortby {% if  value == 0 %}
-                               {% with '0' as search_all_field %}
+                               {% with '3' as search_all_field %}
                                       {% if queries_dict|get_item:'q'|is_empty_query or queries_dict|get_item:'field' != search_all_field.split %}
                                     patent-sortby-disable
                                 {% endif %}
@@ -94,7 +91,7 @@
                                         <div class="float-left">
                                             <span class="media-meta" data-toggle="tooltip" data-placement="top">
                                                 <i class="fa fa-bar-chart"
-                                                   aria-hidden="true">Text score: {{ patent.get_text_score }}</i>
+                                                   aria-hidden="true">Text score: {{ patent.score }}</i>
                                             </span>
                                         </div>
                                     {% endif %}

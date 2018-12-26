@@ -10,20 +10,19 @@ from django.http import (Http404, HttpResponse, HttpResponseBadRequest,
 from django.shortcuts import redirect, render, reverse
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.edit import FormView
+from pymongo import DESCENDING
 
 from recommend.recommend import Predict
 from .search import search_patent
 from .utils import *
 
 SEARCH_FIELDS = {
-    '0': 'All',
     '1': 'Title',
     '2': 'Abstract',
     '3': 'Content',
 }
 
 SEARCH_FIELD_MAPPING = {
-    '0': 'all_fields',
     '1': 'title',
     '2': 'abstract',
     '3': 'content',
@@ -42,13 +41,15 @@ SORT_BY_MAPPING = {
 }
 
 # try to load LDA models here
-t0 = time.time()
+time_load_start = time.time()
 predict = Predict(num_of_rec=settings.NUMBER_OF_RECOMMENDATION)
 path_doc_topic_matrix = './LDAmodel/doc_topic_matrix.pickle'
 mappingFile = open(path_doc_topic_matrix, 'rb')
 doc_topic_matrix = pickle.load(mappingFile)
 mappingFile.close()
-print('Model load time: {}'.format(time.time() - t0))
+time_load_end = time.time()
+model_load_time = time_load_end - time_load_start
+print('Model load time: {}'.format(model_load_time))
 
 
 # Create your views here.
@@ -124,8 +125,6 @@ def search(request):
     if query is None:
         return redirect('/search?q={query}'.format(query=''))
 
-    t0 = time.time()
-
     '''Just as with traditional ORMs, you may limit the number of results returned or skip a number or results in you query. limit() and skip() and methods are available on QuerySet objects, but the array-slicing syntax is preferred for achieving this.
     http://docs.mongoengine.org/guide/querying.html#limiting-and-skipping-results
     '''
@@ -139,48 +138,52 @@ def search(request):
     if order_by is not None and order_by != '':
         sort_option = SORT_BY_MAPPING.get(order_by, None)
 
-    if query is not '':
-        search_field = request.GET.get('field')
-        flag = False
-        if search_field is None or search_field == '' or search_field == '0':
-            if sort_option is not None:
-                patent_list = Patent.objects.search_text(query).order_by(sort_option)
-            else:
-                patent_list = Patent.objects.search_text(query)
-        elif search_field in SEARCH_FIELD_MAPPING:
-            # if search by content, use pymongo instead
-            if search_field == '3':
-                flag = True
-                fil = {"$text": {"$search": query}}
-                patent_list, count = search_patent(
-                    fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE
-                )
-                num_pages = math.ceil(count / settings.ITEMS_PER_PAGE)
-            else:
-                field = SEARCH_FIELD_MAPPING[search_field]
-                sss = {
-                    '{field}__icontains'.format(field=field): query
-                }
-                if sort_option is not None:
-                    patent_list = Patent.objects(**sss).order_by(sort_option)
-                else:
-                    patent_list = Patent.objects(**sss)
-        if not flag:
-            num_pages = math.ceil(patent_list.count() / settings.ITEMS_PER_PAGE)
-            patent_list = patent_list[start: end]
-    else:
-        if sort_option is not None:
-            patent_list = Patent.objects.order_by(sort_option)[start: end]
-        else:
-            patent_list = Patent.objects[start: end]
-        num_pages = Patent.objects.count()
+    # get search field
+    search_field = request.GET.get('field')
+
+    time_query_start = time.time()
 
     patents = []
-    for p in patent_list:
-        patents.append(p)
+    count = None
+    if query is not '' and search_field == '3':
+        '''If user search patent by content
+        Use pymongo to handle text search
+        '''
+        fil = {"$text": {"$search": query}}
+        sort = None
+        if sort_option == '$text_score':
+            fil = [fil, {'score': {'$meta': 'textScore'}}]
+            sort = [('score', {'$meta': 'textScore'})]
+        elif sort_option is not None:
+            sort = [(sort_option.strip('-'), DESCENDING)]
+        patents, count = search_patent(
+            fil=fil, skip=start, sort=sort, limit=settings.ITEMS_PER_PAGE
+        )
+        num_pages = math.ceil(count / settings.ITEMS_PER_PAGE)
+    else:
+        if query is not '':
+            field = SEARCH_FIELD_MAPPING[search_field]
+            sss = {'{field}__icontains'.format(field=field): query}
+            if sort_option is not None:
+                patent_list = Patent.objects(**sss).order_by(sort_option)
+            else:
+                patent_list = Patent.objects(**sss)
+            count = patent_list.count()
+            patent_list = patent_list[start:end]
+        elif query is '':
+            # User query empty (search nothing) then display all
+            if sort_option is not None:
+                patent_list = Patent.objects.order_by(sort_option)[start: end]
+            else:
+                patent_list = Patent.objects[start: end]
+            count = Patent.objects.count()
+        num_pages = math.ceil(count / settings.ITEMS_PER_PAGE)
+        for p in patent_list:
+            patents.append(p)
 
     # calculate time taken to query, sort and paginate
-    time_query = time.time() - t0
+    time_query_end = time.time()
+    time_query = time_query_end - time_query_start
 
     '''If user already logged in, change the query time of user
     and update Search Document.

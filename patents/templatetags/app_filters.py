@@ -17,7 +17,7 @@ def have_text_score(document):
     # except Exception:
     #     return None
     try:
-        return document.get_text_score()
+        return document['score']
     except Exception:
         return False
 

@@ -15,6 +15,19 @@ class Patent(Document):
     rate = FloatField(help_text='Average rating', default=0)
     view = IntField(help_text='View times', default=0)
 
+    meta = {
+        'index_background': True,
+        'auto_create_index': True,
+        'index_drop_dups': True,
+        'indexes': [
+            {
+                'fields': ['$title', '$content', '$abstract'],
+                'default_language': 'english',
+                'weights': {'title': 10, 'content': 5, 'abstract': 5}
+            }
+        ]
+    }
+
 
 class User(Document):
     user_name = StringField(help_text='Login name', required=True)

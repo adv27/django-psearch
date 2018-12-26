@@ -8,16 +8,22 @@ db = client[settings.MONGODB_NAME]
 col = db.patent
 
 
-def search_patent(fil, skip, limit=settings.ITEMS_PER_PAGE, string_id=True, time_search=False):
+def search_patent(fil, skip, limit=settings.ITEMS_PER_PAGE, sort=None, string_id=True, time_search=False):
     time_search_start = time.time()
 
-    cursor = col.find(fil).skip(skip).limit(limit)
+    if isinstance(fil, list):
+        a, b = fil
+        cursor = col.find(a, b).skip(skip).limit(limit)
+    else:
+        cursor = col.find(fil).skip(skip).limit(limit)
+    if sort is not None:
+        cursor.sort(sort)
     count = cursor.count()
     patents = []
     for document in cursor:
         if string_id:
             str_id = str(document['_id'])
-            del(document['_id'])
+            del (document['_id'])
             document['id'] = str_id
         patents.append(document)
 
