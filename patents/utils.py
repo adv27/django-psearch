@@ -76,6 +76,7 @@ def read_file(path):
         django_f = File(f)
         return django_f.read()
 
+
 def handle_uploaded_path(path):
     with open(path, 'rb') as f:
         django_f = File(f)
@@ -184,6 +185,7 @@ def parse_xml(filestream, filename):
 
     if 'us-patent-application' in doc:
         # type 1
+        # print('{} - type 1'.format(filename))
         title = doc['us-patent-application']['us-bibliographic-data-application']['invention-title']['#text']
 
         abstract = doc['us-patent-application']['abstract']
@@ -191,12 +193,19 @@ def parse_xml(filestream, filename):
         if isinstance(abstract, list):
             abstract = get_values_recursive(abstract)
         else:
-            abstract = abstract['p']['#text']
+            abstract_p = abstract['p']
+            if isinstance(abstract_p, list):
+                abstract_p_have_text =  filter(lambda ap: '#text' in ap, abstract_p)
+                abstract = '. '.join((map(lambda apht: apht['#text'], abstract_p_have_text)))
+            elif isinstance(abstract_p, dict) and '#text' in abstract_p:
+                abstract = abstract['p']['#text']
 
         detail = doc['us-patent-application']['description']['p']
-        detail = '. '.join(list(map(lambda d: d['#text'], detail)))
+        detail_have_text = filter(lambda de: '#text' in de, detail)
+        detail = '. '.join((map(lambda d: d['#text'], detail_have_text)))
     elif 'patent-application-publication' in doc:
         # type 2
+        # print('{} - type 2'.format(filename))
         title = doc['patent-application-publication'] \
             ['subdoc-bibliographic-information'] \
             ['technical-information'] \
@@ -208,11 +217,23 @@ def parse_xml(filestream, filename):
             ['subdoc-description'] \
             ['detailed-description'] \
             ['section']
-        para = []
-        for s in detail:
-            for p in s['paragraph']:
-                para.append(p['#text'])
-        detail = '. '.join(para)
+
+        if 'paragraph' in detail:
+            para_have_text = filter(lambda pp: '#text' in pp, detail['paragraph'])
+            para = '. '.join(map(lambda pr: pr['#text'], para_have_text))
+            detail = para
+        else:
+            para = []
+            for s in detail:
+                if 'paragraph' in s:
+                    ppp = s['paragraph']
+                    if isinstance(ppp, list):
+                        for p in ppp:
+                            if '#text' in p:
+                                para.append(p['#text'])
+                    elif isinstance(ppp, dict) and '#text' in ppp:
+                        para.append(ppp['#text'])
+            detail = '. '.join(para)
     else:
         raise Exception('Not supported type - {}'.format(filename))
 
