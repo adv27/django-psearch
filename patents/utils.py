@@ -11,9 +11,9 @@ from .models import *
 
 
 def handle_file_path(path):
-    '''Read file's content by path
-    Return a dictionary contains file name and it's content
-    '''
+    """Read file's content by path
+    Return a dictionary contains file name and it's content.
+    """
     with open(path, 'rb') as f:
         django_f = File(f)
         f_name = os.path.basename(django_f.name)
@@ -23,12 +23,14 @@ def handle_file_path(path):
         }
 
 
-def xml2patent(xml):
+def xml2json(xml):
     import xmltodict
 
     _dict = xmltodict.parse(xml)
     _json = json.dumps(_dict)
     doc = json.loads(_json)
+
+    return doc
 
 
 def get_file_content(path):
@@ -63,6 +65,16 @@ def create_user(username, password):
     )
     user.save()
 
+
+def read_file(path):
+    """Read file by path then return file content.
+
+    :param path: path of file to read
+    :return: file content
+    """
+    with open(path, 'rb') as f:
+        django_f = File(f)
+        return django_f.read()
 
 def handle_uploaded_path(path):
     with open(path, 'rb') as f:
@@ -165,3 +177,54 @@ def get_values_recursive(obj):
         return obj + '\n'
     else:
         return None
+
+
+def parse_xml(filestream, filename):
+    doc = xml2json(filestream)
+
+    if 'us-patent-application' in doc:
+        # type 1
+        title = doc['us-patent-application']['us-bibliographic-data-application']['invention-title']['#text']
+
+        abstract = doc['us-patent-application']['abstract']
+
+        if isinstance(abstract, list):
+            abstract = get_values_recursive(abstract)
+        else:
+            abstract = abstract['p']['#text']
+
+        detail = doc['us-patent-application']['description']['p']
+        detail = '. '.join(list(map(lambda d: d['#text'], detail)))
+    elif 'patent-application-publication' in doc:
+        # type 2
+        title = doc['patent-application-publication'] \
+            ['subdoc-bibliographic-information'] \
+            ['technical-information'] \
+            ['title-of-invention']
+
+        abstract = doc['patent-application-publication']['subdoc-abstract']['paragraph']
+
+        detail = doc['patent-application-publication'] \
+            ['subdoc-description'] \
+            ['detailed-description'] \
+            ['section']
+        para = []
+        for s in detail:
+            for p in s['paragraph']:
+                para.append(p['#text'])
+        detail = '. '.join(para)
+    else:
+        raise Exception('Not supported type - {}'.format(filename))
+
+    return {
+        'title': title,
+        'abstract': abstract,
+        'content': detail
+    }
+
+
+def test_parse_xml(path):
+    with open(path, 'rb') as f:
+        django_f = File(f)
+        f_name = os.path.basename(django_f.name)
+        return parse_xml(f.read(), f_name)
