@@ -19,8 +19,7 @@ def get_db():
     host = settings.MONGODB_HOST
     port = settings.MONGODB_PORT
     client = MongoClient(host, port)
-    db = client[settings.MONGODB_NAME]
-    return db
+    return client[settings.MONGODB_NAME]
 
 def read_and_parse_xml_wrapper(p):
     # read file
@@ -35,14 +34,12 @@ def read_and_parse_xml_wrapper(p):
         print(traceback.format_exc())
         parsed_xml = None
 
-    fc_mapping = {
+    return {
         'path': p,
         'filename': filename,
         'content': file_content,
         'parse': parsed_xml
     }
-
-    return fc_mapping
 
 def insert(path):
     path_exist = exists(path)

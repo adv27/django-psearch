@@ -47,14 +47,15 @@ class LDAModel:
 		# Number of passes in the model
 		self.passes = 3
 		# Print all hyperparameters
-		parameters = {}
-		parameters['min_length'] = self.min_length
-		parameters['num_topics'] = self.num_topics
-		parameters['no_below_this_number'] = self.no_below_this_number
-		parameters['no_above_fraction_of_doc'] = self.no_above_fraction_of_doc
-		parameters['remove_topic_so_less'] = self.remove_topic_so_less
-		parameters['num_of_iterations'] = self.num_of_iterations
-		parameters['passes'] = self.passes
+		parameters = {
+		    'min_length': self.min_length,
+		    'num_topics': self.num_topics,
+		    'no_below_this_number': self.no_below_this_number,
+		    'no_above_fraction_of_doc': self.no_above_fraction_of_doc,
+		    'remove_topic_so_less': self.remove_topic_so_less,
+		    'num_of_iterations': self.num_of_iterations,
+		    'passes': self.passes,
+		}
 		for k in parameters:
 			print("Parameter for {0} is {1}".format(k, parameters[k]))
 		print('Finished initializing....')
@@ -98,7 +99,7 @@ class LDAModel:
 			doc_mapping[k] = title
 			link_mapping[k] = link
 
-			doc_count = doc_count + 1
+			doc_count += 1
 			if doc_count % 100 == 0:
 				print('Have processed {} documents'.format(doc_count))
 
@@ -122,9 +123,8 @@ class LDAModel:
 		Serialize objects into pickle files
 		'''
 		fileName = './LDAmodel/'+fileName+'.pickle'
-		mappingFile = open(fileName, 'wb')
-		pickle.dump(objectName, mappingFile)
-		mappingFile.close()
+		with open(fileName, 'wb') as mappingFile:
+			pickle.dump(objectName, mappingFile)
 
 	def saveModel(self, lda, doc_mapping, link_mapping, corpus):
 		'''
@@ -154,27 +154,23 @@ class LDAModel:
 		print('Link mapping saved at {0}'.format(save_path))
 		# Save doc to topic matrix
 		doc_topic_matrix = {}
-		count = 0
 		print('CORPUS: {}'.format(len(corpus)))
 
 		if self.index_mapping is True:
-			for doc in corpus:
-				dense_vector = {}
+			for count, doc in enumerate(corpus):
 				vector = self.__convertListToDict(lda[doc])
-				# remove topic that is so irrelevant
-				for topic in vector:
-					if vector[topic] > self.remove_topic_so_less:
-						dense_vector[topic] = vector[topic]
+				dense_vector = {
+				    topic: vector[topic]
+				    for topic in vector if vector[topic] > self.remove_topic_so_less
+				}
 				doc_topic_matrix[count] = dense_vector
-				count = count+1
 		else:
 			for index, p_id in enumerate(doc_mapping.keys()):
-				dense_vector = {}
 				vector = self.__convertListToDict(lda[corpus[index]])
-				# remove topic that is so irrelevant
-				for topic in vector:
-					if vector[topic] > self.remove_topic_so_less:
-						dense_vector[topic] = vector[topic]
+				dense_vector = {
+				    topic: vector[topic]
+				    for topic in vector if vector[topic] > self.remove_topic_so_less
+				}
 				doc_topic_matrix[p_id] = dense_vector
 
 		save_path = 'doc_topic_matrix'

@@ -44,9 +44,8 @@ SORT_BY_MAPPING = {
 time_load_start = time.time()
 predict = Predict(num_of_rec=settings.NUMBER_OF_RECOMMENDATION)
 path_doc_topic_matrix = './LDAmodel/doc_topic_matrix.pickle'
-mappingFile = open(path_doc_topic_matrix, 'rb')
-doc_topic_matrix = pickle.load(mappingFile)
-mappingFile.close()
+with open(path_doc_topic_matrix, 'rb') as mappingFile:
+    doc_topic_matrix = pickle.load(mappingFile)
 time_load_end = time.time()
 model_load_time = time_load_end - time_load_start
 print('Model load time: {}'.format(model_load_time))
@@ -103,11 +102,7 @@ def search_api(request):
             f1 = {search_field_verbose: regx} if search_field_verbose != 'all_fields' else None
             f2 = {"$text": {"$search": query}}
 
-            if f1 is not None:
-                fil = {'$and': [f1, f2]}
-            else:
-                fil = f2
-
+            fil = {'$and': [f1, f2]} if f1 is not None else f2
     # patents = search_patent(fil=fil, order_by=sort_option, skip=start, limit=settings.ITEMS_PER_PAGE)
     patents, count, search_time = search_patent(fil=fil, skip=start, limit=settings.ITEMS_PER_PAGE, time_search=True)
 
@@ -170,7 +165,7 @@ def search(request):
                 patent_list = Patent.objects(**sss)
             count = patent_list.count()
             patent_list = patent_list[start:end]
-        elif query is '':
+        else:
             # User query empty (search nothing) then display all
             if sort_option is not None:
                 patent_list = Patent.objects.order_by(sort_option)[start: end]
@@ -315,14 +310,12 @@ def detail(request, pat_id):
     If (USE_USER_HISTORY) is True then use latest (N_RECENTLY_VIEWED) viewed patent 
     to generate user_dict
     '''
-    user_dict = {}
     if settings.USE_USER_HISTORY and u:
         args = list(map(lambda p: str(p.pk), u.views[-settings.N_RECENTLY_VIEWED:]))
         # print(args)
     else:
         args = [pat_id]
-    for arg in args:
-        user_dict[arg] = doc_topic_matrix[arg]
+    user_dict = {arg: doc_topic_matrix[arg] for arg in args}
     rec_ids = predict.run(user_dict, False)
     rec_patents = []
     for patent_id in rec_ids:
@@ -342,10 +335,7 @@ def detail(request, pat_id):
         'rate_avg': rate_avg,
     })
 
-    context.update({
-        'rec_patents': rec_patents,
-    })
-
+    context['rec_patents'] = rec_patents
     return render(request, template_name='patents/show.html', context=context)
 
 
@@ -353,14 +343,13 @@ def detail(request, pat_id):
 def login(request):
     if request.method == 'POST':
         u = User.objects(user_name__iexact=request.POST['username']).first()
-        if u is not None:
-            if u.password == request.POST['password']:
-                request.session['user_id'] = str(u.id)
-                # return HttpResponseRedirect(reverse('patents:index'))
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Login successful',
-                })
+        if u is not None and u.password == request.POST['password']:
+            request.session['user_id'] = str(u.id)
+            # return HttpResponseRedirect(reverse('patents:index'))
+            return JsonResponse({
+                'success': True,
+                'message': 'Login successful',
+            })
         return JsonResponse({
             'success': False,
             'message': 'Wrong credential',
@@ -405,44 +394,44 @@ def change_password_account(request):
     """
     - Checking session to make sure that user have been logged in
     """
-    if request.method == 'POST':
-        uid = request.session.get('user_id', False)
-        if uid:
-            u = User.objects.get(id=uid)
-            if u:
-                current_password = request.POST.get('current_psw')
-                if current_password != u.password:
-                    return JsonResponse({
-                        'success': False,
-                        'message': 'Current password not match',
-                    })
-
-                new_password = request.POST.get('new_psw')
-                new_password_confirmation = request.POST.get('new_psw_confirmation')
-                if new_password is None or new_password == '':
-                    return JsonResponse({
-                        'success': False,
-                        'message': 'New Password is invalid',
-                    })
-                if new_password != new_password_confirmation:
-                    return JsonResponse({
-                        'success': False,
-                        'message': 'Password confirmation not match',
-                    })
-
-                u.password = new_password
-                u.save()
-                # return redirect(reverse('patents:index'))
-                logout(request)
+    if request.method != 'POST':
+        return HttpResponseBadRequest()
+    uid = request.session.get('user_id', False)
+    if uid:
+        u = User.objects.get(id=uid)
+        if u:
+            current_password = request.POST.get('current_psw')
+            if current_password != u.password:
                 return JsonResponse({
-                    'success': True,
-                    'message': 'Password changed',
+                    'success': False,
+                    'message': 'Current password not match',
                 })
-        return JsonResponse({
-            'success': False,
-            'message': 'Permission denied',
-        })
-    return HttpResponseBadRequest()
+
+            new_password = request.POST.get('new_psw')
+            new_password_confirmation = request.POST.get('new_psw_confirmation')
+            if new_password is None or new_password == '':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'New Password is invalid',
+                })
+            if new_password != new_password_confirmation:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Password confirmation not match',
+                })
+
+            u.password = new_password
+            u.save()
+            # return redirect(reverse('patents:index'))
+            logout(request)
+            return JsonResponse({
+                'success': True,
+                'message': 'Password changed',
+            })
+    return JsonResponse({
+        'success': False,
+        'message': 'Permission denied',
+    })
 
 
 def rate(request):
@@ -454,43 +443,48 @@ def rate(request):
     elif request.method == 'POST':
         patent_id = request.POST.get('pid', False)
         rating = request.POST.get('rating', False)
-    if patent_id and rating:
-        # checking user session
-        uid = request.session.get('user_id', False)
-        if uid:
-            u = User.objects.get(id=uid)
-            p = Patent.objects.get(id=patent_id)
-            try:
-                r = Rate.objects.get(
-                    user_id=u,
-                    patent_id=p,
-                )
-                # if rate is matching in the db, update it's rating and date
-                r.rating = rating
-                r.date = datetime.now()
-            except DoesNotExist:
-                # create new rate document
-                r = Rate(
-                    user_id=u,
-                    patent_id=p,
-                    rating=rating,
-                    date=datetime.now()
-                )
-            if r is not None:
-                # save it
-                r.save()
-                # re-calculate average rate from Patent Document then save it
-                rates = Rate.objects.filter(patent_id=p)
-                from statistics import mean
-                p.rate = mean(list(map(lambda _r: _r.rating, rates)))
-                p.save()
+    if not patent_id or not rating:
+        return HttpResponse('patent and rating false')
+    # checking user session
+    uid = request.session.get('user_id', False)
+    if not uid:
+        return HttpResponse('uid false')
+    u = User.objects.get(id=uid)
+    p = Patent.objects.get(id=patent_id)
+    try:
+        r = Rate.objects.get(
+            user_id=u,
+            patent_id=p,
+        )
+        # if rate is matching in the db, update it's rating and date
+        r.rating = rating
+        r.date = datetime.now()
+    except DoesNotExist:
+        # create new rate document
+        r = Rate(
+            user_id=u,
+            patent_id=p,
+            rating=rating,
+            date=datetime.now()
+        )
+    if r is None:
+        return JsonResponse({
+            'error': True
+        })
+    # save it
+    r.save()
+    # re-calculate average rate from Patent Document then save it
+    rates = Rate.objects.filter(patent_id=p)
+    from statistics import mean
+    p.rate = mean(list(map(lambda _r: _r.rating, rates)))
+    p.save()
 
-                from .templatetags.app_filters import rate_times
-                rate_times = rate_times(p)
+    from .templatetags.app_filters import rate_times
+    rate_times = rate_times(p)
 
-                rate_count = get_rate_percentage(rates)
+    rate_count = get_rate_percentage(rates)
 
-                jsonRes = JsonResponse({
+    return JsonResponse({
                     'uid': str(r.user_id.id),
                     'pid': str(r.patent_id.id),
                     'rating': r.rating,
@@ -499,15 +493,6 @@ def rate(request):
                     'rate_times': rate_times,
                     'rate_count': rate_count,
                 })
-                return jsonRes
-            else:
-                return JsonResponse({
-                    'error': True
-                })
-        else:
-            return HttpResponse('uid false')
-    else:
-        return HttpResponse('patent and rating false')
 
 
 class UploadFileForm(forms.Form):
@@ -528,38 +513,37 @@ class FileFieldView(FormView):
         form = self.get_form(form_class)
         files_field = request.FILES.getlist('file_field')
         directory_field = request.POST.get('directory_field')
-        if form.is_valid():
-            t0 = time.time()
-            if directory_field:
-                if os.path.exists(directory_field):
-                    print(directory_field)
-                    file_names = os.listdir(directory_field)
-                    'filter the file name list, only take .xml file'
-                    file_names = list(filter(lambda name: os.path.splitext(name.lower())[1] == '.xml', file_names))
-                    'if the file name already in the db, then skip it'
-                    f_in = Patent.objects(filename__in=file_names)
-                    f_in = list(map(lambda d: d['filename'], f_in))
-                    file_names = list(set(file_names) - set(f_in))
+        if not form.is_valid():
+            return self.form_invalid(form)
+        t0 = time.time()
+        if directory_field:
+            if os.path.exists(directory_field):
+                print(directory_field)
+                file_names = os.listdir(directory_field)
+                'filter the file name list, only take .xml file'
+                file_names = list(filter(lambda name: os.path.splitext(name.lower())[1] == '.xml', file_names))
+                'if the file name already in the db, then skip it'
+                f_in = Patent.objects(filename__in=file_names)
+                f_in = list(map(lambda d: d['filename'], f_in))
+                file_names = list(set(file_names) - set(f_in))
 
-                    # 'join the file name with the directory path, to get the file path on computer'
-                    file_paths = map(lambda name: os.path.join(directory_field, name), file_names)
+                # 'join the file name with the directory path, to get the file path on computer'
+                file_paths = map(lambda name: os.path.join(directory_field, name), file_names)
 
-                    with Pool(processes=15) as pool:
-                        pool.map(handle_uploaded_path, file_paths)
-                        pool.close()
-                        pool.join()
-                else:
-                    print("directory doesn't exist")
-            elif files_field:
-                print('len(files): {}, type: {}'.format(len(files_field), type(files_field)))
-                'filter the files list, if the file name already in the db, then skip it'
-                files = (f for f in files_field if Patent.objects.filter(filename=f.name).first() is None)
-                with Pool(processes=15) as pool:  # using 15 processes to handle uploaded files
-                    file_list = ((f.name, f.read()) for f in files)
-                    pool.map(handle_uploaded_file_unpack, file_list)
+                with Pool(processes=15) as pool:
+                    pool.map(handle_uploaded_path, file_paths)
                     pool.close()
                     pool.join()
-            print('{}'.format(time.time() - t0))
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
+            else:
+                print("directory doesn't exist")
+        elif files_field:
+            print('len(files): {}, type: {}'.format(len(files_field), type(files_field)))
+            'filter the files list, if the file name already in the db, then skip it'
+            files = (f for f in files_field if Patent.objects.filter(filename=f.name).first() is None)
+            with Pool(processes=15) as pool:  # using 15 processes to handle uploaded files
+                file_list = ((f.name, f.read()) for f in files)
+                pool.map(handle_uploaded_file_unpack, file_list)
+                pool.close()
+                pool.join()
+        print('{}'.format(time.time() - t0))
+        return self.form_valid(form)
