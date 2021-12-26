@@ -17,10 +17,9 @@ def tokenizeWholeCorpora(pathToCorpora):
     doc_mapping={}
     walk = os.walk(pathToCorpora)
     for root, dirs, files in walk:
-        for name in files:        
-            f = open(os.path.join(root, name), 'r')
-            raw = f.read()
-            f.close()
+        for name in files:
+            with open(os.path.join(root, name), 'r') as f:
+                raw = f.read()
             # call preprocessing function
             preprocessed_text = preprocessing(raw)
             # Skip document length < min_length
@@ -28,18 +27,17 @@ def tokenizeWholeCorpora(pathToCorpora):
                 continue
             tokens = tokenize(preprocessed_text,stopwords,full_mode,HMM_mode_on)
             train_set.append(list(tokens))
-            
+
             # Build doc-mapping
             doc_mapping[doc_count] = name
-            doc_count = doc_count+1
+            doc_count += 1
 
     return doc_count,train_set,doc_mapping
 
 def getOrderedDict(dic):
     from operator import itemgetter
     from collections import OrderedDict
-    sorteddict = OrderedDict(sorted(dic.items(), key=itemgetter(1),reverse=True))
-    return sorteddict
+    return OrderedDict(sorted(dic.items(), key=itemgetter(1),reverse=True))
     
     
 def convertListToDict(anylist):
@@ -58,13 +56,7 @@ def dotprod(a, b):
     Returns:
         dotProd: result of the dot product with the two input dictionarieyes
     """
-    dotProd = 0
-    for token in a:
-        if b.has_key(token):
-            dotProd = dotProd + a[token]*b[token]
-            #dotProd = dotProd + math.pow(a[token]*b[token],2)
-            
-    return dotProd
+    return sum(a[token]*b[token] for token in a if b.has_key(token))
 
 def norm(a):
     """ Compute square root of the dot product
@@ -73,9 +65,7 @@ def norm(a):
     Returns:
         norm: a dictionary of tokens to its TF values
     """
-    sumTotal = 0
-    for key in a:
-        sumTotal = sumTotal + a[key] ** 2
+    sumTotal = sum(a[key] ** 2 for key in a)
     return math.sqrt(sumTotal)
 
 def cossim(a, b):
@@ -109,16 +99,13 @@ def get_stop_words_list(path_dict_for_stopwords):
                     i = i.replace('\n','')
                     ox.add(i)
                 list_of_stop_words = list_of_stop_words.union(ox)
-            if ('csv' in name) and not ('complete' in name):
+            if 'csv' in name and 'complete' not in name:
                 csv_path = os.path.join(root,name)
                 df = pd.read_csv(csv_path)
                 current_set_of_stopwords = set(df.word)
                 list_of_stop_words = list_of_stop_words.union(current_set_of_stopwords)
-    
-    decoded_tokens = set()
-    for token in list_of_stop_words:
-        decoded_tokens.add(token.decode('utf8'))
-    return decoded_tokens
+
+    return {token.decode('utf8') for token in list_of_stop_words}
 
 def preprocessing(content):
     remove_punc = ('。 ； 。 、 」 「 ， （ ） —').split(' ')
@@ -143,7 +130,10 @@ def preprocessing(content):
 
 def tokenize(content,stopwords,full_mode,HMM_mode_on):
     word_list = set(jieba.cut(content, cut_all = full_mode,HMM=HMM_mode_on))
-    removed_words_only_1_character = set([words for words in word_list if len(words)>=2])
+    removed_words_only_1_character = {
+        words for words in word_list if len(words) >= 2
+    }
+
     #removed_words_only_1_character = word_list
     #remove stop words
     removed_words_only_1_character.difference_update(stopwords)
@@ -151,16 +141,14 @@ def tokenize(content,stopwords,full_mode,HMM_mode_on):
     
 def savePickleFile(fileName,objectName):
     fileName= './LDAmodel/'+fileName+'.pickle'
-    mappingFile = open(fileName,'w')
-    pickle.dump(objectName,mappingFile)
-    mappingFile.close()
+    with open(fileName,'w') as mappingFile:
+        pickle.dump(objectName,mappingFile)
     print('saved at {0}'.format(fileName))
     
 def loadPickleFile(fileName):
     fileName = './LDAmodel/'+fileName+'.pickle'
-    mappingFile = open(fileName,'rb')
-    objectName = pickle.load(mappingFile)
-    mappingFile.close() 
+    with open(fileName,'rb') as mappingFile:
+        objectName = pickle.load(mappingFile)
     return objectName
 
 def fill_list_from_dict(a,topics):

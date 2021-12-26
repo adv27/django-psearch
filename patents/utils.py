@@ -28,9 +28,7 @@ def xml2json(xml):
 
     _dict = xmltodict.parse(xml)
     _json = json.dumps(_dict)
-    doc = json.loads(_json)
-
-    return doc
+    return json.loads(_json)
 
 
 def get_file_content(path):
@@ -154,13 +152,11 @@ def get_paginate(page_no, num_pages):
         Current page >= (number of pages -6): show the last 11 pages.
     """
     if num_pages <= 11 or page_no <= 6:  # case 1 and 2
-        pages = [x for x in range(1, min(num_pages + 1, 12))]
+        return list(range(1, min(num_pages + 1, 12)))
     elif page_no > num_pages - 6:  # case 4
-        pages = [x for x in range(num_pages - 10, num_pages + 1)]
+        return list(range(num_pages - 10, num_pages + 1))
     else:  # case 3
-        pages = [x for x in range(page_no - 5, page_no + 6)]
-
-    return pages
+        return list(range(page_no - 5, page_no + 6))
 
 
 def get_values_recursive(obj):
